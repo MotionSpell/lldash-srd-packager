@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="CWI_modules">
+      <UniqueIdentifier>{51ad28c6-4584-4747-abae-efa4efa8671a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cwi_pcl_encoder.cpp">
+      <Filter>CWI_modules</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cwi_pcl_encoder.hpp">
+      <Filter>CWI_modules</Filter>
+    </ClInclude>
+    <ClInclude Include="multi_file_reader.hpp">
+      <Filter>CWI_modules</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
