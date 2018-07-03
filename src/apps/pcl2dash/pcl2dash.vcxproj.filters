@@ -9,12 +9,18 @@
     <ClCompile Include="cwi_pcl_encoder.cpp">
       <Filter>CWI_modules</Filter>
     </ClCompile>
+    <ClCompile Include="json2pipeline.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cwi_pcl_encoder.hpp">
       <Filter>CWI_modules</Filter>
     </ClInclude>
     <ClInclude Include="multi_file_reader.hpp">
+      <Filter>CWI_modules</Filter>
+    </ClInclude>
+    <ClInclude Include="options.hpp" />
+    <ClInclude Include="..\..\..\extra\include\cwi_encode\cwi_encode.h">
       <Filter>CWI_modules</Filter>
     </ClInclude>
   </ItemGroup>

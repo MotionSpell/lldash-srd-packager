@@ -118,14 +118,14 @@
       <AssemblerListingLocation>$(IntDir)%(RelativeDir)</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <XMLDocumentationFileName>$(IntDir)%(RelativeDir)</XMLDocumentationFileName>
-      <AdditionalIncludeDirectories>.;$(ProjectDir)\..\..\;$(ProjectDir)\..\..\..\signals\src\;$(ProjectDir)\..\..\..\signals\extra_lib\include\freetype2;$(ProjectDir)\..\..\..\signals\extra_lib\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)/extra/include;$(ProjectDir)\..\..\;$(ProjectDir)\..\..\..\signals\src\;$(ProjectDir)\..\..\..\signals\extra_lib\include\freetype2;$(ProjectDir)\..\..\..\signals\extra_lib\include</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\signals\extra_lib\lib\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>notelemetry.obj;freetype.lib;libcurl.lib;turbojpeg.lib;SDL2.lib;libgpac.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;aws-cpp-sdk-core.lib;aws-cpp-sdk-mediastore-data.lib;aws-cpp-sdk-mediastore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\signals\extra_lib\lib\$(Platform)\$(Configuration);$(SolutionDir)\extra\lib\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>notelemetry.obj;cwi_encode.lib;freetype.lib;libcurl.lib;turbojpeg.lib;SDL2.lib;libgpac.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;aws-cpp-sdk-core.lib;aws-cpp-sdk-mediastore-data.lib;aws-cpp-sdk-mediastore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -145,14 +145,14 @@
       <AssemblerListingLocation>$(IntDir)%(RelativeDir)</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <XMLDocumentationFileName>$(IntDir)%(RelativeDir)</XMLDocumentationFileName>
-      <AdditionalIncludeDirectories>.;$(ProjectDir)\..\..\;$(ProjectDir)\..\..\..\signals\src\;$(ProjectDir)\..\..\..\signals\extra_lib\include\freetype2;$(ProjectDir)\..\..\..\signals\extra_lib\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)/extra/include;$(ProjectDir)\..\..\;$(ProjectDir)\..\..\..\signals\src\;$(ProjectDir)\..\..\..\signals\extra_lib\include\freetype2;$(ProjectDir)\..\..\..\signals\extra_lib\include</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\signals\extra_lib\lib\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>notelemetry.obj;freetype.lib;libcurl.lib;turbojpeg.lib;SDL2.lib;libgpac.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;aws-cpp-sdk-core.lib;aws-cpp-sdk-mediastore-data.lib;aws-cpp-sdk-mediastore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\signals\extra_lib\lib\$(Platform)\$(Configuration);$(SolutionDir)\extra\lib\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>notelemetry.obj;cwi_encode.lib;freetype.lib;libcurl.lib;turbojpeg.lib;SDL2.lib;libgpac.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;aws-cpp-sdk-core.lib;aws-cpp-sdk-mediastore-data.lib;aws-cpp-sdk-mediastore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -170,7 +170,7 @@
       <AssemblerListingLocation>$(IntDir)%(RelativeDir)</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <XMLDocumentationFileName>$(IntDir)%(RelativeDir)</XMLDocumentationFileName>
-      <AdditionalIncludeDirectories>.;$(ProjectDir)\..\..\;$(ProjectDir)\..\..\..\signals\src\;$(ProjectDir)\..\..\..\signals\extra_lib\include\freetype2;$(ProjectDir)\..\..\..\signals\extra_lib\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)/extra/include;$(ProjectDir)\..\..\;$(ProjectDir)\..\..\..\signals\src\;$(ProjectDir)\..\..\..\signals\extra_lib\include\freetype2;$(ProjectDir)\..\..\..\signals\extra_lib\include</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
@@ -178,8 +178,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>No</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\signals\extra_lib\lib\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>notelemetry.obj;freetype.lib;libcurl.lib;turbojpeg.lib;SDL2.lib;libgpac.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;aws-cpp-sdk-core.lib;aws-cpp-sdk-mediastore-data.lib;aws-cpp-sdk-mediastore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\signals\extra_lib\lib\$(Platform)\$(Configuration);$(SolutionDir)\extra\lib\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>notelemetry.obj;cwi_encode.lib;freetype.lib;libcurl.lib;turbojpeg.lib;SDL2.lib;libgpac.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;aws-cpp-sdk-core.lib;aws-cpp-sdk-mediastore-data.lib;aws-cpp-sdk-mediastore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -197,7 +197,7 @@
       <AssemblerListingLocation>$(IntDir)%(RelativeDir)</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <XMLDocumentationFileName>$(IntDir)%(RelativeDir)</XMLDocumentationFileName>
-      <AdditionalIncludeDirectories>.;$(ProjectDir)\..\..\;$(ProjectDir)\..\..\..\signals\src\;$(ProjectDir)\..\..\..\signals\extra_lib\include\freetype2;$(ProjectDir)\..\..\..\signals\extra_lib\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)/extra/include;$(ProjectDir)\..\..\;$(ProjectDir)\..\..\..\signals\src\;$(ProjectDir)\..\..\..\signals\extra_lib\include\freetype2;$(ProjectDir)\..\..\..\signals\extra_lib\include</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
@@ -205,8 +205,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>No</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\signals\extra_lib\lib\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>notelemetry.obj;freetype.lib;libcurl.lib;turbojpeg.lib;SDL2.lib;libgpac.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;aws-cpp-sdk-core.lib;aws-cpp-sdk-mediastore-data.lib;aws-cpp-sdk-mediastore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\signals\extra_lib\lib\$(Platform)\$(Configuration);$(SolutionDir)\extra\lib\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>notelemetry.obj;cwi_encode.lib;freetype.lib;libcurl.lib;turbojpeg.lib;SDL2.lib;libgpac.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;aws-cpp-sdk-core.lib;aws-cpp-sdk-mediastore-data.lib;aws-cpp-sdk-mediastore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -226,6 +226,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\extra\include\cwi_encode\cwi_encode.h" />
     <ClInclude Include="cwi_pcl_encoder.hpp" />
     <ClInclude Include="multi_file_reader.hpp" />
     <ClInclude Include="options.hpp" />

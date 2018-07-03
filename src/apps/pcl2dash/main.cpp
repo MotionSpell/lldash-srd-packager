@@ -1,4 +1,5 @@
 #include "lib_appcommon/options.hpp"
+#include "lib_utils/format.hpp"
 #include "lib_utils/tools.hpp"
 #include "options.hpp"
 #include <iostream>
@@ -10,7 +11,8 @@ const char *g_appName = "pcl2dash";
 extern int safeMain(int argc, char const* argv[]);
 
 static void usage() {
-	std::cerr << "Usage: " << g_appName << " PCL_files_path" << std::endl;
+	std::cerr << "Usage: " << g_appName << " PCL_files_pattern" << std::endl;
+	std::cerr << "Example: " << g_appName << " folder/file%04d.ply" << std::endl;
 }
 
 std::unique_ptr<const IConfig> processArgs(int argc, char const* argv[]) {
