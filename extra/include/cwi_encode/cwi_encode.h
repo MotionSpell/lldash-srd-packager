@@ -3,9 +3,6 @@
 
 #include <sstream>
 
-class __declspec(dllexport) cwi_encode
-{
-public:
-	int cwi_encoder(CWI_PCLEncoder::Params param, void* pc, std::stringstream& comp_frame);
-	int cwi_decoder(CWI_PCLEncoder::Params param, void* pc, std::stringstream& comp_frame);
-};
+__declspec(dllimport) int __cdecl cwi_encoder(void *param, void* pc, void *comp_frame);
+__declspec(dllimport) int __cdecl cwi_decoder(void *param, void* pc, void *comp_frame);
+__declspec(dllimport) int __cdecl cwi_test(void *p);

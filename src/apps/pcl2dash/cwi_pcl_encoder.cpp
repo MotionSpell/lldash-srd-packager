@@ -1,6 +1,11 @@
 #include "cwi_pcl_encoder.hpp"
 #include <cwi_encode/cwi_encode.h>
+#include "lib_media/common/libav.hpp"
 #include "lib_utils/profiler.hpp"
+
+extern "C" {
+#include <libavcodec/avcodec.h>
+}
 
 using namespace Modules;
 
@@ -9,7 +14,16 @@ using namespace Modules;
 CWI_PCLEncoder::CWI_PCLEncoder(const Params &params)
 : params(params) {
 	addInput(new Input<DataBase>(this));
-	output = addOutput<Modules::OutputDataDefault<Modules::DataRaw>>();
+	output = addOutput<OutputDataDefault<DataAVPacket>>();
+	auto codecCtx = shptr(avcodec_alloc_context3(nullptr));
+	//TODO: capture frame rate: int fps
+	codecCtx->time_base = { IClock::Rate, 1 };
+	/*FrameRate: ok
+	Geometry resolution: TODO: have a new quantizer type
+	Quantization parameter: TODO: have a new quelity/bitrate type*/
+	//codecCtx->extradata_size = ;
+	//codecCtx->extradata = av_malloc(codecCtx->extradata_size);
+	output->setMetadata(make_shared<MetadataPktLibavVideo>(codecCtx));
 }
 
 CWI_PCLEncoder::~CWI_PCLEncoder() {
@@ -18,29 +32,32 @@ CWI_PCLEncoder::~CWI_PCLEncoder() {
 void CWI_PCLEncoder::process(Data data) {
 	Tools::Profiler p("Processing PCC frame");
 	auto out = output->getBuffer(0);
+	AVPacket *pkt = out->getPacket();
 
 	{
 #ifndef FIXME_USE_FAKE_PCC
 		Tools::Profiler p("  Encoding time only");
-		cwi_encode cwi_encode_object;
 		std::stringstream comp_frame;
-		cwi_encode_object.cwi_encoder(params, (void*)data->data(), comp_frame);
+		cwi_encoder(&params, (void*)data->data(), (void*)&comp_frame);
 		auto const resData = comp_frame.str();
 		auto const resDataSize = resData.size();
-		out->resize(resDataSize);
-		memcpy(out->data(), resData.c_str(), resDataSize);
+		pkt->size = (int)resDataSize;
+		if (av_grow_packet(pkt, pkt->size))
+			throw error(format("impossible to resize sample to size %s", resDataSize));
+		memcpy(pkt->data, resData.c_str(), resDataSize);
 #else /*FIXME_USE_FAKE_PCC*/
-		out->resize(100);
+		cwi_test(nullptr);
+		av_grow_packet(pkt, 100);
 #endif /*FIXME_USE_FAKE_PCC*/
 	}
 
+	pkt->dts = pkt->pts = data->getMediaTime();
+	pkt->flags |= AV_PKT_FLAG_KEY;
 	out->setMediaTime(data->getMediaTime());
 
-	//capture frame rate: int fps
 	//timestamp: long netTimestamp, long captureTimestamp
 	//Geometry resolution (Number of points): long int ptCount
 	//Point size: float ptSize
-	//out->setMetadata();
 
 	output->emit(out);
 }
