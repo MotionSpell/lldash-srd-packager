@@ -1,5 +1,4 @@
 #include "cwi_pcl_encoder.hpp"
-#include <cwi_encode/cwi_encode.h>
 #include "lib_media/common/libav.hpp"
 #include "lib_utils/profiler.hpp"
 
@@ -9,9 +8,9 @@ extern "C" {
 
 using namespace Modules;
 
-#define FIXME_USE_FAKE_PCC
+//#define FIXME_USE_FAKE_PCC
 
-CWI_PCLEncoder::CWI_PCLEncoder(const Params &params)
+CWI_PCLEncoder::CWI_PCLEncoder(const encoder_params &params)
 : params(params) {
 	addInput(new Input<DataBase>(this));
 	output = addOutput<OutputDataDefault<DataAVPacket>>();
@@ -38,13 +37,15 @@ void CWI_PCLEncoder::process(Data data) {
 #ifndef FIXME_USE_FAKE_PCC
 		Tools::Profiler p("  Encoding time only");
 		std::stringstream comp_frame;
-		cwi_encoder(&params, (void*)data->data(), (void*)&comp_frame);
+		cwi_encode encoder;
+		encoder.cwi_encoder(params, *((void**)data->data()), comp_frame);
 		auto const resData = comp_frame.str();
 		auto const resDataSize = resData.size();
 		pkt->size = (int)resDataSize;
 		if (av_grow_packet(pkt, pkt->size))
 			throw error(format("impossible to resize sample to size %s", resDataSize));
 		memcpy(pkt->data, resData.c_str(), resDataSize);
+		delete *((void**)(data->data())); //Romain: only to circumvent the boo::shared_ptr ownership issue
 #else /*FIXME_USE_FAKE_PCC*/
 		cwi_test(nullptr);
 		av_grow_packet(pkt, 100);

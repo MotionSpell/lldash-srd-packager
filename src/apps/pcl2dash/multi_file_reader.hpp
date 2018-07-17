@@ -3,7 +3,10 @@
 #include "lib_modules/modules.hpp"
 #include "lib_utils/profiler.hpp"
 #include "lib_utils/system_clock.hpp"
+#include <cwi_encode/cwi_encode.h>
 #include <string>
+
+//#define DISABLE_PLY_LOADER
 
 class MultifileReader : public Modules::ActiveModule {
 public:
@@ -18,6 +21,7 @@ public:
 		//TODO: void getPointCloud(long *netTimestamp, long *captureTimestamp, void *frame);
 
 		Tools::Profiler profiler("Processing PCC frame");
+#ifdef DISABLE_PLY_LOADER
 		auto p = format("%s", path);
 		auto file = fopen(p.c_str(), "rb");
 		if (!file) {
@@ -29,8 +33,14 @@ public:
 		fseek(file, 0, SEEK_SET);
 
 		auto out = output->getBuffer(size);
-		fwrite(out->data(), 1, (size_t)out->size(), file);
+		fread(out->data(), 1, (size_t)out->size(), file);
 		fclose(file);
+#else
+		void *res = nullptr;
+		load_ply_file_XYZRGB(path, &res);
+		auto out = output->getBuffer(sizeof(res));
+		memcpy(out->data(), &res, sizeof(res));
+#endif
 		out->setMediaTime(fractionToClock(g_SystemClock->now()));
 		g_SystemClock->sleep(Fraction(1, 100)); //FIXME
 		output->emit(out);

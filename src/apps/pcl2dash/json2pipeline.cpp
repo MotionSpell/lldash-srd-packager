@@ -16,7 +16,7 @@ std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
 	auto const segDurationInMs = 1000;
 
 	auto input = pipeline->addModule<MultifileReader>(config->inputPath);
-	Params pclEncoderParams;
+	encoder_params pclEncoderParams;
 	auto pclEncoder = pipeline->addModule<CWI_PCLEncoder>(pclEncoderParams);
 	pipeline->connect(input, 0, pclEncoder, 0);
 
