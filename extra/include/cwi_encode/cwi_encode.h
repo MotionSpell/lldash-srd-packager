@@ -25,3 +25,4 @@ public:
 };
 
 __declspec(dllimport) int load_ply_file_XYZRGB(std::string path, void **pc);
+__declspec(dllimport) void delete_ply_data(void *pc);
