@@ -11,17 +11,20 @@ const char *g_appName = "pcl2dash";
 extern int safeMain(int argc, char const* argv[]);
 
 static void usage() {
-	std::cerr << "Usage: " << g_appName << " PCL_files_pattern" << std::endl;
-	std::cerr << "Example: " << g_appName << " folder/file%04d.ply" << std::endl;
+	std::cerr << "Usage: " << g_appName << " [PCL_files_pattern]" << std::endl;
+	std::cerr << "Examples:" << std::endl;
+	std::cerr << "\t" << g_appName << std::endl;
+	std::cerr << "\t" << g_appName << " folder/file%04d.ply" << std::endl;
 }
 
 std::unique_ptr<const IConfig> processArgs(int argc, char const* argv[]) {
-	if (argc != 2) {
+	if (argc < 1 || argc > 2) {
 		usage();
-		throw std::runtime_error(format("[%s] Expected 1 arguments, got %s", g_appName, argc - 1));
+		throw std::runtime_error(format("[%s] Expected 0 or 1 argument, got %s", g_appName, argc - 1));
 	}
 	auto opts = uptr(new Config);
-	opts->inputPath = argv[1];
+	if (argc >= 2)
+		opts->inputPath = argv[1];
 	return std::move(opts);
 }
 
