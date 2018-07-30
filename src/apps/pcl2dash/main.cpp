@@ -10,21 +10,23 @@ const char *g_appName = "pcl2dash";
 
 extern int safeMain(int argc, char const* argv[]);
 
-static void usage() {
-	std::cerr << "Usage: " << g_appName << " [PCL_files_pattern]" << std::endl;
-	std::cerr << "Examples:" << std::endl;
-	std::cerr << "\t" << g_appName << std::endl;
-	std::cerr << "\t" << g_appName << " folder/file%04d.ply" << std::endl;
-}
-
 std::unique_ptr<const IConfig> processArgs(int argc, char const* argv[]) {
-	if (argc < 1 || argc > 2) {
-		usage();
-		throw std::runtime_error(format("[%s] Expected 0 or 1 argument, got %s", g_appName, argc - 1));
-	}
+	CmdLineOptions opt;
 	auto opts = uptr(new Config);
-	if (argc >= 2)
-		opts->inputPath = argv[1];
+
+	opt.add("n", "frames", &opts->numFrames, format("Num frames to process [default=%s]", opts->numFrames));
+	opt.add("t", "threading", &opts->threading, format("Threads: 1 is mono, 2 is multi [default=%s]", opts->threading));
+
+	auto files = opt.parse(argc, argv);
+	if (files.size() > 1) {
+		Log::msg(Error, "Usage: %s [options, see below] [PCL_files_pattern]", g_appName);
+		opt.printHelp(std::cerr);
+		throw std::runtime_error("invalid command line");
+	}
+
+	if (files.size() == 1)
+		opts->inputPath = files[0];
+
 	return std::move(opts);
 }
 

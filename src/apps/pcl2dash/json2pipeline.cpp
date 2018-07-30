@@ -11,11 +11,11 @@ using namespace Pipelines;
 extern const char *g_appName;
 
 std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
-	auto pipeline = uptr(new Pipeline);
 	auto config = safe_cast<const Config>(&iconfig);
+	auto pipeline = uptr(new Pipeline(false, (Pipeline::Threading)config->threading));
 	auto const segDurationInMs = 1000;
 
-	auto input = pipeline->addModule<MultifileReader>(config->inputPath);
+	auto input = pipeline->addModule<MultifileReader>(config->inputPath, config->numFrames);
 	encoder_params pclEncoderParams;
 	auto pclEncoder = pipeline->addModule<CWI_PCLEncoder>(pclEncoderParams);
 	pipeline->connect(input, 0, pclEncoder, 0);
