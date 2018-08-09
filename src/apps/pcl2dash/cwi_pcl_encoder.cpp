@@ -38,7 +38,10 @@ void CWI_PCLEncoder::process(Data data) {
 		Tools::Profiler p("  Encoding time only");
 		std::stringstream comp_frame;
 		cwi_encode encoder;
-		encoder.cwi_encoder(params, *((void**)data->data()), comp_frame);
+
+		long t; //TODO put in t a struct when the data+meta format is stable
+		encoder.cwi_encoder(params, *((void**)(data->data() + sizeof(decltype(t)))), comp_frame, *((decltype(t)*)data->data()));
+
 		auto const resData = comp_frame.str();
 		auto const resDataSize = resData.size();
 		if (av_grow_packet(pkt, (int)resDataSize))

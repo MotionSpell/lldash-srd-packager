@@ -50,8 +50,8 @@ public:
 			Tools::Profiler profiler("Processing PCC frame");
 
 			void *res = nullptr;
+			long t = 4;
 			if (hInstLibrary) {
-				long t = 4;
 				res = &t;
 				getPointCloud(&t, &res);
 				log(Debug, "got a pointcloud captured at = %s", t);
@@ -59,8 +59,9 @@ public:
 				load_ply_file_XYZRGB(path, &res);
 			}
 
-			auto out = output->getBuffer(sizeof(res));
-			memcpy(out->data(), &res, sizeof(res));
+			auto out = output->getBuffer(sizeof(decltype(t)) + sizeof(res));
+			memcpy(out->data(), &t, sizeof(decltype(t)));
+			memcpy(out->data() + sizeof(decltype(t)), &res, sizeof(res));
 			out->setMediaTime(fractionToClock(g_SystemClock->now()));
 			g_SystemClock->sleep(Fraction(1, 100)); //FIXME
 			output->emit(out);

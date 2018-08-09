@@ -20,7 +20,7 @@ struct encoder_params
 class __declspec(dllimport) cwi_encode
 {
 public:
-	int cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame);
+	int cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame, long timestamp);
 	int cwi_decoder(encoder_params param, void* pc, std::stringstream& comp_frame);
 };
 
