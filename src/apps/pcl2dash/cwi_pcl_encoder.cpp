@@ -39,7 +39,7 @@ void CWI_PCLEncoder::process(Data data) {
 		std::stringstream comp_frame;
 		cwi_encode encoder;
 
-		long t; //TODO put in t a struct when the data+meta format is stable
+		uint64_t t; //TODO put in t a struct when the data+meta format is stable
 		encoder.cwi_encoder(params, *((void**)(data->data() + sizeof(decltype(t)))), comp_frame, *((decltype(t)*)data->data()));
 
 		auto const resData = comp_frame.str();

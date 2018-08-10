@@ -50,7 +50,7 @@ public:
 			Tools::Profiler profiler("Processing PCC frame");
 
 			void *res = nullptr;
-			long t = 4;
+			uint64_t t = 4;
 			if (hInstLibrary) {
 				res = &t;
 				getPointCloud(&t, &res);
@@ -77,7 +77,7 @@ private:
 	Modules::OutputDefault *output;
 	HINSTANCE hInstLibrary = { 0 };
 	//void getPointCloud(long *netTimestamp, long *captureTimestamp, void *frame);
-	typedef void(*GetPointCloudFunction)(long *, void **);
+	typedef void(*GetPointCloudFunction)(uint64_t *, void **);
 	GetPointCloudFunction getPointCloud = nullptr;
 	int numFrame = 0, numFrameMax;
 };
