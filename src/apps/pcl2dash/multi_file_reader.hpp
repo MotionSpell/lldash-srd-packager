@@ -62,7 +62,7 @@ public:
 			auto out = output->getBuffer(sizeof(decltype(t)) + sizeof(res));
 			memcpy(out->data(), &t, sizeof(decltype(t)));
 			memcpy(out->data() + sizeof(decltype(t)), &res, sizeof(res));
-			out->setMediaTime(fractionToClock(g_SystemClock->now()));
+			out->setMediaTime(fractionToClock(g_SystemClock->now()) - initTimeIn180k);
 			g_SystemClock->sleep(Fraction(1, 100)); //FIXME
 			output->emit(out);
 
@@ -80,4 +80,5 @@ private:
 	typedef void(*GetPointCloudFunction)(uint64_t *, void **);
 	GetPointCloudFunction getPointCloud = nullptr;
 	int numFrame = 0, numFrameMax;
+	uint64_t initTimeIn180k = fractionToClock(g_SystemClock->now());
 };

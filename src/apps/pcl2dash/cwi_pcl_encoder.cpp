@@ -16,7 +16,7 @@ CWI_PCLEncoder::CWI_PCLEncoder(const encoder_params &params)
 	output = addOutput<OutputDataDefault<DataAVPacket>>();
 	auto codecCtx = shptr(avcodec_alloc_context3(nullptr));
 	//TODO: capture frame rate: int fps
-	codecCtx->time_base = { IClock::Rate, 1 };
+	codecCtx->time_base = { 1, IClock::Rate };
 	/*FrameRate: ok
 	Geometry resolution: TODO: have a new quantizer type
 	Quantization parameter: TODO: have a new quality/bitrate type*/
