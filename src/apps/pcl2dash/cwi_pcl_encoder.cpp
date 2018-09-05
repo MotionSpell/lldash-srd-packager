@@ -40,15 +40,15 @@ void CWI_PCLEncoder::process(Data data) {
 		cwi_encode encoder;
 
 		uint64_t t; //TODO put in t a struct when the data+meta format is stable
-		encoder.cwi_encoder(params, *((void**)(data->data() + sizeof(decltype(t)))), comp_frame, *((decltype(t)*)data->data()));
+		auto dataPtr = *((void**)(data->data() + sizeof(decltype(t))));
+		encoder.cwi_encoder(params, dataPtr, comp_frame, *((decltype(t)*)data->data()));
 
 		auto const resData = comp_frame.str();
 		auto const resDataSize = resData.size();
 		if (av_grow_packet(pkt, (int)resDataSize))
 			throw error(format("impossible to resize sample to size %s", resDataSize));
 		memcpy(pkt->data, resData.c_str(), resDataSize);
-		auto ptr = *(void**)data->data();
-		delete_ply_data(*(void**)data->data());
+		delete_ply_data(dataPtr);
 #else /*FIXME_USE_FAKE_PCC*/
 		cwi_test(nullptr);
 		av_grow_packet(pkt, 100);
