@@ -13,7 +13,7 @@ namespace {
 char* GetThisPath(char* dest, size_t destSize) {
 	if (!dest) return NULL;
 	if (MAX_PATH > destSize) return NULL;
-	DWORD length = GetModuleFileNameA(NULL, dest, destSize);
+	DWORD length = GetModuleFileNameA(NULL, dest, (DWORD)destSize);
 	PathRemoveFileSpecA(dest);
 	return dest;
 }
