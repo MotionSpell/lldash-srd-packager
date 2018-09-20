@@ -10,7 +10,7 @@ struct encoder_params
 	int num_threads = 1;
 	bool do_inter_frame = false;
 	int gop_size = 1;
-	double exp_factor = 0.2;
+	double exp_factor = 0.0;
 	int octree_bits = 7;
 	int color_bits = 8;
 	int jpeg_quality = 85;
