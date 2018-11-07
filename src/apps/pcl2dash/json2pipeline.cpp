@@ -13,17 +13,18 @@ extern const char *g_appName;
 std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
 	auto config = safe_cast<const Config>(&iconfig);
 	auto pipeline = uptr(new Pipeline(false, (Pipeline::Threading)config->threading));
-	auto const segDurationInMs = 1;
 
 	auto input = pipeline->addModule<MultifileReader>(config->inputPath, config->numFrames);
 	encoder_params pclEncoderParams;
 	auto pclEncoder = pipeline->addModule<CWI_PCLEncoder>(pclEncoderParams);
 	pipeline->connect(input, 0, pclEncoder, 0);
 
-	auto muxer = pipeline->addModule<Mux::GPACMuxMP4>("pcl", segDurationInMs, Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::Browsers | Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::NoEditLists);
+	auto muxer = pipeline->addModule<Mux::GPACMuxMP4>("pcl", config->segDurInMs == 0 ? 1 : config->segDurInMs,
+		Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::Browsers | Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::NoEditLists);
 	pipeline->connect(pclEncoder, 0, muxer, 0);
 
-	auto dasher = pipeline->addModule<Stream::MPEG_DASH>("", format("%s.mpd", g_appName), Stream::AdaptiveStreamingCommon::Live, 0);
+	auto dasher = pipeline->addModule<Stream::MPEG_DASH>("", format("%s.mpd", g_appName), Stream::AdaptiveStreamingCommon::Live, config->segDurInMs,
+		0, 0, 0, std::vector<std::string>{}, "id", 0, config->delayInSeg);
 	pipeline->connect(muxer, 0, dasher, 0);
 
 	return pipeline;

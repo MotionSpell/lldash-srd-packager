@@ -8,4 +8,6 @@ struct Config : IConfig {
 	std::string inputPath;
 	int numFrames = std::numeric_limits<int>::max();
 	int threading = 2;
+	int segDurInMs = 1;
+	int delayInSeg = 0;
 };
