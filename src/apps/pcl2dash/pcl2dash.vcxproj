@@ -224,6 +224,7 @@
   <ItemGroup>
     <ClCompile Include="cwi_pcl_encoder.cpp" />
     <ClCompile Include="json2pipeline.cpp" />
+    <ClCompile Include="json_encoder_params.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

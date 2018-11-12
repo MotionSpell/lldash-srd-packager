@@ -9,13 +9,17 @@ using namespace Modules;
 using namespace Pipelines;
 
 extern const char *g_appName;
+extern encoder_params parseParamFile(std::string param_file);
 
 std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
 	auto config = safe_cast<const Config>(&iconfig);
 	auto pipeline = uptr(new Pipeline(false, (Pipeline::Threading)config->threading));
 
 	auto input = pipeline->addModule<MultifileReader>(config->inputPath, config->numFrames);
+
 	encoder_params pclEncoderParams;
+	if (!config->param_file.empty())
+		pclEncoderParams = parseParamFile(config->param_file);
 	auto pclEncoder = pipeline->addModule<CWI_PCLEncoder>(pclEncoderParams);
 	pipeline->connect(input, 0, pclEncoder, 0);
 

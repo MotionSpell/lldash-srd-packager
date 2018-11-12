@@ -11,6 +11,7 @@
     </ClCompile>
     <ClCompile Include="json2pipeline.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="json_encoder_params.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cwi_pcl_encoder.hpp">

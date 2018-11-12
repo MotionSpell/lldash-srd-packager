@@ -18,6 +18,7 @@ std::unique_ptr<const IConfig> processArgs(int argc, char const* argv[]) {
 	opt.add("t", "threading", &opts->threading, format("Threads: 1 is mono, 2 is multi [default=%s]", opts->threading));
 	opt.add("s", "durationInMs", &opts->segDurInMs, format("0: segmentTimeline, otherwise SegmentNumber [default=%s]", opts->segDurInMs));
 	opt.add("d", "delayInSeg", &opts->delayInSeg, format("signed delay in segments to be deducted from the DASH startNumber [default=%s]", opts->delayInSeg));
+	opt.add("p", "paramFile", &opts->param_file, format("JSON file containing custom encoder parameters [default=\"%s\"]", opts->param_file));
 
 	auto files = opt.parse(argc, argv);
 	if (files.size() > 1) {
