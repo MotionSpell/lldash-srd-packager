@@ -17,12 +17,19 @@ struct encoder_params
 	int macroblock_size = 16;
 };
 
-class __declspec(dllimport) cwi_encode
+#ifdef _MSC_VER
+#define CWI_IMPORT __declspec(dllimport)
+#else
+#define CWI_IMPORT
+#endif
+
+class CWI_IMPORT cwi_encode
 {
 public:
 	int cwi_encoder(encoder_params param, void* pc, std::stringstream& comp_frame, uint64_t timestamp);
 	int cwi_decoder(encoder_params param, void* pc, std::stringstream& comp_frame);
 };
 
-__declspec(dllimport) int load_ply_file_XYZRGB(std::string path, void **pc);
-__declspec(dllimport) void delete_ply_data(void *pc);
+CWI_IMPORT int load_ply_file_XYZRGB(std::string path, void **pc);
+CWI_IMPORT void delete_ply_data(void *pc);
+

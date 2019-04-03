@@ -5,6 +5,9 @@
 #include "lib_utils/system_clock.hpp"
 #include <cwi_encode/cwi_encode.h>
 #include <string>
+
+#ifdef _MSC_VER
+
 #include <windows.h>
 #include <filesystem>
 using namespace std::experimental::filesystem::v1;
@@ -19,6 +22,15 @@ char* GetThisPath(char* dest, size_t destSize) {
 	PathRemoveFileSpecA(dest);
 	return dest;
 }
+
+#else /*_MSC_VER*/
+
+#include <experimental/filesystem>
+using namespace std::experimental::filesystem::v1;
+
+namespace {
+
+#endif /*_MSC_VER*/
 
 std::vector<std::string> resolvePaths(std::string path) {
 	std::vector<std::string> res;
@@ -35,6 +47,7 @@ public:
 	: path(path), numFrameMax(numFrameMax) {
 		output = addOutput<Modules::OutputDataDefault<Modules::DataRaw>>();
 
+#if _MSC_VER
 		char dest[MAX_PATH];
 		GetThisPath(dest, MAX_PATH);
 		auto const DLLName = "\\multiFrame.dll";
@@ -47,12 +60,20 @@ public:
 			log(Warning, "Using file based capture with pattern from %s", path);
 		} else
 			throw error(format("ERROR: no DLL '%s' found and no file argument (\'%s\'). Check usage.", dest, path));
+#else
+		if (!resolvePaths(path).empty()) {
+                        log(Warning, "Using file based capture with pattern from %s", path);
+                } else
+                        throw error(format("ERROR: no file argument (\'%s\'). Check usage.", path));
+#endif /*_MSC_VER*/
 	}
 
 	~MultifileReader() {
+#ifdef _MSC_VER
 		if (hInstLibrary) {
 			FreeLibrary(hInstLibrary);
 		}
+#endif
 	}
 
 	bool work() override {
@@ -67,11 +88,14 @@ public:
 
 			void *res = nullptr;
 			uint64_t t = 4;
+#ifdef _MSC_VER
 			if (hInstLibrary) {
 				res = &t;
 				getPointCloud(&t, &res);
 				log(Debug, "got a pointcloud captured at = %s", t);
-			} else {
+			} else
+#endif
+			{
 				load_ply_file_XYZRGB(paths[numFrame % paths.size()], &res);
 			}
 
@@ -91,7 +115,9 @@ public:
 private:
 	std::string path;
 	Modules::OutputDefault *output;
-	HINSTANCE hInstLibrary = { 0 };
+#if _MSC_VER
+	HINSTANCE hInstLibrary = { };
+#endif
 	//void getPointCloud(long *netTimestamp, long *captureTimestamp, void *frame);
 	typedef void(*GetPointCloudFunction)(uint64_t *, void **);
 	GetPointCloudFunction getPointCloud = nullptr;
