@@ -6,6 +6,8 @@
 #include <cwi_encode/cwi_encode.h>
 #include <string>
 #include <windows.h>
+#include <filesystem>
+using namespace std::experimental::filesystem::v1;
 
 namespace {
 #include <Shlwapi.h>
@@ -16,6 +18,14 @@ char* GetThisPath(char* dest, size_t destSize) {
 	DWORD length = GetModuleFileNameA(NULL, dest, (DWORD)destSize);
 	PathRemoveFileSpecA(dest);
 	return dest;
+}
+
+std::vector<std::string> resolvePaths(std::string path) {
+	std::vector<std::string> res;
+	for (const auto & entry : directory_iterator(path)) {
+		res.push_back(entry.path().string());
+	}
+	return res;
 }
 }
 
@@ -33,10 +43,10 @@ public:
 		if (hInstLibrary) {
 			getPointCloud = (GetPointCloudFunction)GetProcAddress(hInstLibrary, "getPointCloud");
 			log(Warning, "Using capture from %s", dest);
-		} else if (!path.empty()) {
+		} else if (!resolvePaths(path).empty()) {
 			log(Warning, "Using file based capture with pattern from %s", path);
 		} else
-			throw error(format("ERROR: no DLL '%s' found and no file argument. Check usage.", dest));
+			throw error(format("ERROR: no DLL '%s' found and no file argument (\'%s\'). Check usage.", dest, path));
 	}
 
 	~MultifileReader() {
@@ -46,7 +56,13 @@ public:
 	}
 
 	bool work() override {
-		if (numFrame++ < numFrameMax) {
+		std::vector<std::string> paths = resolvePaths(path);
+
+		auto const cond = [this]() {
+			return ((numFrame++ < numFrameMax) || numFrameMax == -1);
+		};
+
+		if (cond()) {
 			Tools::Profiler profiler("Processing PCC frame");
 
 			void *res = nullptr;
@@ -56,7 +72,7 @@ public:
 				getPointCloud(&t, &res);
 				log(Debug, "got a pointcloud captured at = %s", t);
 			} else {
-				load_ply_file_XYZRGB(path, &res);
+				load_ply_file_XYZRGB(paths[numFrame % paths.size()], &res);
 			}
 
 			auto out = output->getBuffer(sizeof(decltype(t)) + sizeof(res));
