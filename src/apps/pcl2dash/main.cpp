@@ -14,7 +14,7 @@ std::unique_ptr<const IConfig> processArgs(int argc, char const* argv[]) {
 	CmdLineOptions opt;
 	auto opts = uptr(new Config);
 
-	opt.add("n", "frames", &opts->numFrames, format("Num frames to process [default=%s]", opts->numFrames));
+	opt.add("n", "frames", &opts->numFrames, format("Num frames to process (-1 is infinite) [default=%s]", opts->numFrames));
 	opt.add("t", "threading", &opts->threading, format("Threads: 1 is mono, 2 is multi [default=%s]", opts->threading));
 	opt.add("s", "durationInMs", &opts->segDurInMs, format("0: segmentTimeline, otherwise SegmentNumber [default=%s]", opts->segDurInMs));
 	opt.add("d", "delayInSeg", &opts->delayInSeg, format("signed delay in segments to be deducted from the DASH startNumber [default=%s]", opts->delayInSeg));
