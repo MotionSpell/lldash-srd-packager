@@ -6,11 +6,12 @@
 #include <cwi_encode/cwi_encode.h>
 #include <string>
 
+#include <experimental/filesystem>
+using namespace std::experimental::filesystem::v1;
+
 #ifdef _MSC_VER
 
 #include <windows.h>
-#include <filesystem>
-using namespace std::experimental::filesystem::v1;
 
 namespace {
 #include <Shlwapi.h>
@@ -24,9 +25,6 @@ char* GetThisPath(char* dest, size_t destSize) {
 }
 
 #else /*_MSC_VER*/
-
-#include <experimental/filesystem>
-using namespace std::experimental::filesystem::v1;
 
 namespace {
 
