@@ -1,1 +1,0 @@
-This is the Encoding&Encapsulation component developed within the VRTogether consortium
