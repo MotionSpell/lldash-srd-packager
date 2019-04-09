@@ -22,7 +22,7 @@ struct vrt_handle {
 	int64_t initTimeIn180k = fractionToClock(g_SystemClock->now()), timeIn180k = -1;
 };
 
-vrt_handle* vrt_create(const char* name, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
+vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
 	try {
 		auto h = make_unique<vrt_handle>();
 
@@ -35,7 +35,7 @@ vrt_handle* vrt_create(const char* name, int seg_dur_in_ms, int timeshift_buffer
 		// Pipeline
 		h->pipe = make_unique<Pipeline>();
 		auto muxer = h->inputModule = h->pipe->addModule<Mux::GPACMuxMP4>(name, seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms,
-			Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur);
+			Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur, MP4_4CC);
 		auto dasher = h->pipe->addModule<Stream::MPEG_DASH>("", format("%s.mpd", name), Stream::AdaptiveStreamingCommon::Live, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
 		h->pipe->connect(muxer, 0, dasher, 0);
 

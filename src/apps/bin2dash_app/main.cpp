@@ -37,7 +37,7 @@ std::unique_ptr<const Config> args(int argc, char const* argv[]) {
 int main(int argc, char const* argv[]) {
 	try {
 		auto config = args(argc, argv);
-		auto handle = vrt_create("vrtogether", config->segDurInMs);
+		auto handle = vrt_create("vrtogether", VRT_4CC('c','w','i','1'), config->segDurInMs);
 
 		auto paths = resolvePaths(config->inputPath);
 		if (paths.empty())
