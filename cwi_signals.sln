@@ -54,7 +54,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "appcommon", "signals\src\li
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pcl2dash", "src\apps\pcl2dash\pcl2dash.vcxproj", "{0CD2B539-3B8B-48D1-8A41-CB2026D9AA67}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dll2dash", "src\apps\dll2dash\dll2dash.vcxproj", "{39FBEF33-9D60-4EAB-8B60-7E50C14D5700}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bin2dash", "src\apps\bin2dash\bin2dash.vcxproj", "{39FBEF33-9D60-4EAB-8B60-7E50C14D5700}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bin2dash_app", "src\apps\bin2dash_app\bin2dash_app.vcxproj", "{8F7D5865-767F-415B-A2FC-182364E9A811}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -160,6 +162,14 @@ Global
 		{39FBEF33-9D60-4EAB-8B60-7E50C14D5700}.Release|Win32.Build.0 = Release|Win32
 		{39FBEF33-9D60-4EAB-8B60-7E50C14D5700}.Release|x64.ActiveCfg = Release|x64
 		{39FBEF33-9D60-4EAB-8B60-7E50C14D5700}.Release|x64.Build.0 = Release|x64
+		{8F7D5865-767F-415B-A2FC-182364E9A811}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8F7D5865-767F-415B-A2FC-182364E9A811}.Debug|Win32.Build.0 = Debug|Win32
+		{8F7D5865-767F-415B-A2FC-182364E9A811}.Debug|x64.ActiveCfg = Debug|x64
+		{8F7D5865-767F-415B-A2FC-182364E9A811}.Debug|x64.Build.0 = Debug|x64
+		{8F7D5865-767F-415B-A2FC-182364E9A811}.Release|Win32.ActiveCfg = Release|Win32
+		{8F7D5865-767F-415B-A2FC-182364E9A811}.Release|Win32.Build.0 = Release|Win32
+		{8F7D5865-767F-415B-A2FC-182364E9A811}.Release|x64.ActiveCfg = Release|x64
+		{8F7D5865-767F-415B-A2FC-182364E9A811}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -180,6 +190,7 @@ Global
 		{64F77F21-C278-42D0-ABC3-B79F1453F4C6} = {A290926A-109B-4AD8-99F0-469AB6EFCA0C}
 		{0CD2B539-3B8B-48D1-8A41-CB2026D9AA67} = {6D5EFFD6-364D-49FB-BB06-E03244245CD4}
 		{39FBEF33-9D60-4EAB-8B60-7E50C14D5700} = {6D5EFFD6-364D-49FB-BB06-E03244245CD4}
+		{8F7D5865-767F-415B-A2FC-182364E9A811} = {6D5EFFD6-364D-49FB-BB06-E03244245CD4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43D8AC23-8513-4A31-9333-8ADB6A899D68}

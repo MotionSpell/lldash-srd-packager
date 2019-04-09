@@ -26,26 +26,26 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -211,9 +211,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\signals\src\lib_appcommon\appcommon.vcxproj">
-      <Project>{64f77f21-c278-42d0-abc3-b79f1453f4c6}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\signals\src\lib_media\media.vcxproj">
       <Project>{3ed5c725-44b6-4e0b-a38c-73d85d8347cd}</Project>
     </ProjectReference>
@@ -222,16 +219,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cwi_pcl_encoder.cpp" />
-    <ClCompile Include="json2pipeline.cpp" />
-    <ClCompile Include="json_encoder_params.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="bin2dash.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\extra\include\cwi_encode\cwi_encode.h" />
-    <ClInclude Include="cwi_pcl_encoder.hpp" />
-    <ClInclude Include="multi_file_reader.hpp" />
-    <ClInclude Include="options.hpp" />
+    <ClInclude Include="bin2dash.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
