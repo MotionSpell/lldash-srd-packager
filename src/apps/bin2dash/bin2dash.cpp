@@ -19,7 +19,7 @@ struct vrt_handle {
 	unique_ptr<Pipeline> pipe;
 	shared_ptr<DataAVPacket> inputData;
 	IPipelinedModule *inputModule = nullptr;
-	uint64_t initTimeIn180k = fractionToClock(g_SystemClock->now());
+	int64_t initTimeIn180k = fractionToClock(g_SystemClock->now()), timeIn180k = -1;
 };
 
 vrt_handle* vrt_create(const char* name, int seg_dur_in_ms) {
@@ -63,7 +63,8 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		auto data = safe_cast<DataAVPacket>(h->inputData);
 		auto pkt = data->getPacket();
 		data->resize(bufferSize);
-		data->setMediaTime(fractionToClock(g_SystemClock->now()) - h->initTimeIn180k);
+		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
+		data->setMediaTime(h->timeIn180k);
 		//data->setMediaTime();
 		//pkt->dts = ;
 		//pkt->dts = ;
@@ -75,4 +76,8 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		fflush(stderr);
 		return false;
 	}
+}
+
+int64_t vrt_get_media_time(vrt_handle* h, int timescale) {
+	return convertToTimescale(h->timeIn180k, IClock::Rate, timescale);
 }
