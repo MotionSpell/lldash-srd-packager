@@ -4,6 +4,7 @@
 #include "lib_pipeline/pipeline.hpp"
 #include "lib_media/mux/gpac_mux_mp4.hpp"
 #include "lib_media/stream/mpeg_dash.hpp"
+#include "lib_utils/os.hpp"
 #include "lib_utils/system_clock.hpp"
 #include <cstdio>
 
@@ -26,6 +27,12 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, int seg_dur_in_ms, in
 	try {
 		auto h = make_unique<vrt_handle>();
 
+		// Env
+		auto const prefix = Stream::AdaptiveStreamingCommon::getCommonPrefixVideo(0, Resolution(0, 0));
+		auto const subdir = prefix + "/";
+		if (!dirExists(subdir))
+			mkdir(subdir);
+
 		// Input data
 		h->inputData = make_shared<DataAVPacket>(0);
 		auto codecCtx = shptr(avcodec_alloc_context3(nullptr));
@@ -34,8 +41,8 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, int seg_dur_in_ms, in
 
 		// Pipeline
 		h->pipe = make_unique<Pipeline>(false, Pipeline::Mono);
-		auto muxer = h->inputModule = h->pipe->addModule<Mux::GPACMuxMP4>(name, seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms,
-			Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur, MP4_4CC);
+		auto muxer = h->inputModule = h->pipe->addModule<Mux::GPACMuxMP4>(subdir + prefix, seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms,
+			Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::SegNumStartsAtZero, MP4_4CC);
 		auto dasher = h->pipe->addModule<Stream::MPEG_DASH>("", format("%s.mpd", name), Stream::AdaptiveStreamingCommon::Live, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
 		h->pipe->connect(muxer, 0, dasher, 0);
 

@@ -1,6 +1,7 @@
 #include "lib_pipeline/pipeline.hpp"
 #include "lib_media/mux/gpac_mux_mp4.hpp"
 #include "lib_media/stream/mpeg_dash.hpp"
+#include "lib_utils/os.hpp"
 #include "multi_file_reader.hpp"
 #include "cwi_pcl_encoder.hpp"
 #include "options.hpp"
@@ -23,8 +24,13 @@ std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
 	auto pclEncoder = pipeline->addModule<CWI_PCLEncoder>(pclEncoderParams);
 	pipeline->connect(input, 0, pclEncoder, 0);
 
-	auto muxer = pipeline->addModule<Mux::GPACMuxMP4>("pcl", config->segDurInMs == 0 ? 1 : config->segDurInMs,
-		Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur);
+	auto const prefix = Stream::AdaptiveStreamingCommon::getCommonPrefixVideo(0, Resolution(0, 0));
+	auto const subdir = prefix + "/";
+	if (!dirExists(subdir))
+		mkdir(subdir);
+
+	auto muxer = pipeline->addModule<Mux::GPACMuxMP4>(subdir + prefix, config->segDurInMs == 0 ? 1 : config->segDurInMs,
+		Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::SegNumStartsAtZero);
 	pipeline->connect(pclEncoder, 0, muxer, 0);
 
 	auto dasher = pipeline->addModule<Stream::MPEG_DASH>("", format("%s.mpd", g_appName), Stream::AdaptiveStreamingCommon::Live, config->segDurInMs,
