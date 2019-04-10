@@ -33,7 +33,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, int seg_dur_in_ms, in
 		h->inputData->setMetadata(make_shared<MetadataPktLibavVideo>(codecCtx));
 
 		// Pipeline
-		h->pipe = make_unique<Pipeline>();
+		h->pipe = make_unique<Pipeline>(false, Pipeline::Mono);
 		auto muxer = h->inputModule = h->pipe->addModule<Mux::GPACMuxMP4>(name, seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms,
 			Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur, MP4_4CC);
 		auto dasher = h->pipe->addModule<Stream::MPEG_DASH>("", format("%s.mpd", name), Stream::AdaptiveStreamingCommon::Live, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
@@ -65,9 +65,10 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		data->resize(bufferSize);
 		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
 		data->setMediaTime(h->timeIn180k);
-		//data->setMediaTime();
-		//pkt->dts = ;
-		//pkt->dts = ;
+		pkt->dts = h->timeIn180k;
+		pkt->pts = h->timeIn180k;
+		pkt->flags |= AV_PKT_FLAG_KEY;
+
 		h->inputModule->getInput(0)->push(data);
 		h->inputModule->getInput(0)->process();
 		return true;
