@@ -1,0 +1,12 @@
+FOO {
+  # explicitly list symbols to be exported
+  global:
+
+    vrt_create;
+    vrt_destroy;
+    vrt_push_buffer;
+    vrt_get_media_time;
+
+  # hide everything else
+  local: *;
+};
