@@ -8,8 +8,6 @@ extern "C" {
 
 using namespace Modules;
 
-//#define FIXME_USE_FAKE_PCC
-
 CWI_PCLEncoder::CWI_PCLEncoder(const encoder_params &params)
 : params(params) {
 	addInput(new Input<DataBase>(this));
@@ -34,7 +32,6 @@ void CWI_PCLEncoder::process(Data data) {
 	AVPacket *pkt = out->getPacket();
 
 	{
-#ifndef FIXME_USE_FAKE_PCC
 		Tools::Profiler p("  Encoding time only");
 		std::stringstream comp_frame;
 		cwi_encode encoder;
@@ -49,10 +46,6 @@ void CWI_PCLEncoder::process(Data data) {
 			throw error(format("impossible to resize sample to size %s", resDataSize));
 		memcpy(pkt->data, resData.c_str(), resDataSize);
 		delete_ply_data(dataPtr);
-#else /*FIXME_USE_FAKE_PCC*/
-		cwi_test(nullptr);
-		av_grow_packet(pkt, 100);
-#endif /*FIXME_USE_FAKE_PCC*/
 	}
 
 	pkt->dts = pkt->pts = data->getMediaTime();
