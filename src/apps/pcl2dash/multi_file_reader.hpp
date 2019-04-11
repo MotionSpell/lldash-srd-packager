@@ -3,32 +3,13 @@
 #include "lib_modules/modules.hpp"
 #include "lib_utils/profiler.hpp"
 #include "lib_utils/system_clock.hpp"
-#include <cwi_encode/cwi_encode.h>
+#include "cwipc_realsense2/api.h"
 #include <string>
 
 #include <experimental/filesystem>
 using namespace std::experimental::filesystem::v1;
 
-#ifdef _MSC_VER
-
-#include <windows.h>
-
 namespace {
-#include <Shlwapi.h>
-#pragma comment(lib, "shlwapi.lib")
-char* GetThisPath(char* dest, size_t destSize) {
-	if (!dest) return NULL;
-	if (MAX_PATH > destSize) return NULL;
-	DWORD length = GetModuleFileNameA(NULL, dest, (DWORD)destSize);
-	PathRemoveFileSpecA(dest);
-	return dest;
-}
-
-#else /*_MSC_VER*/
-
-namespace {
-
-#endif /*_MSC_VER*/
 
 std::vector<std::string> resolvePaths(std::string path) {
 	std::vector<std::string> res;
@@ -45,33 +26,17 @@ public:
 	: path(path), numFrameMax(numFrameMax) {
 		output = addOutput<Modules::OutputDataDefault<Modules::DataRaw>>();
 
-#if _MSC_VER
-		char dest[MAX_PATH];
-		GetThisPath(dest, MAX_PATH);
-		auto const DLLName = "\\multiFrame.dll";
-		strncat(dest, DLLName, MAX_PATH);
-		hInstLibrary = LoadLibraryA(dest);
-		if (hInstLibrary) {
-			getPointCloud = (GetPointCloudFunction)GetProcAddress(hInstLibrary, "getPointCloud");
-			log(Warning, "Using capture from %s", dest);
+		auto source = cwipc_realsense2(nullptr);
+		if (!source) {
+			source = cwipc_synthetic();
+			log(Warning, "Using synthetic capture source");
 		} else if (!resolvePaths(path).empty()) {
 			log(Warning, "Using file based capture with pattern from %s", path);
 		} else
-			throw error(format("ERROR: no DLL '%s' found and no file argument (\'%s\'). Check usage.", dest, path));
-#else
-		if (!resolvePaths(path).empty()) {
-                        log(Warning, "Using file based capture with pattern from %s", path);
-                } else
-                        throw error(format("ERROR: no file argument (\'%s\'). Check usage.", path));
-#endif /*_MSC_VER*/
+			throw error(format("ERROR: no realsense2 found and no file argument (\'%s\'). Check usage.", path));
 	}
 
 	~MultifileReader() {
-#ifdef _MSC_VER
-		if (hInstLibrary) {
-			FreeLibrary(hInstLibrary);
-		}
-#endif
 	}
 
 	bool work() override {
@@ -84,24 +49,22 @@ public:
 		if (cond()) {
 			Tools::Profiler profiler("Processing PCC frame");
 
-			void *res = nullptr;
-			uint64_t t = 4;
-#ifdef _MSC_VER
-			if (hInstLibrary) {
-				res = &t;
-				getPointCloud(&t, &res);
-				log(Debug, "got a pointcloud captured at = %s", t);
-			} else
-#endif
-			{
-				load_ply_file_XYZRGB(paths[numFrame % paths.size()], &res);
+			cwipc *frame = nullptr;
+			int64_t timeIn180k;
+			if (source) {
+				frame = cwipc_source_get(source);
+				if (initTimeIn180k == -1) initTimeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000000);
+				timeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000000) - initTimeIn180k;
+			} else {
+				if (initTimeIn180k == -1) initTimeIn180k = fractionToClock(g_SystemClock->now());
+				timeIn180k = fractionToClock(g_SystemClock->now()) - initTimeIn180k;
+				frame = cwipc_read(paths[numFrame % paths.size()].c_str(), timeIn180k, nullptr);
 			}
 
-			auto out = output->getBuffer(sizeof(decltype(t)) + sizeof(res));
-			memcpy(out->data(), &t, sizeof(decltype(t)));
-			memcpy(out->data() + sizeof(decltype(t)), &res, sizeof(res));
-			out->setMediaTime(fractionToClock(g_SystemClock->now()) - initTimeIn180k);
-			g_SystemClock->sleep(Fraction(1, 100)); //FIXME
+			auto out = output->getBuffer(sizeof(decltype(frame)));
+			memcpy(out->data(), &frame, sizeof(decltype(frame)));
+			out->setMediaTime(timeIn180k);
+			g_SystemClock->sleep(Fraction(1, 100));
 			output->emit(out);
 
 			return true;
@@ -113,12 +76,7 @@ public:
 private:
 	std::string path;
 	Modules::OutputDefault *output;
-#if _MSC_VER
-	HINSTANCE hInstLibrary = { };
-#endif
-	//void getPointCloud(long *netTimestamp, long *captureTimestamp, void *frame);
-	typedef void(*GetPointCloudFunction)(uint64_t *, void **);
-	GetPointCloudFunction getPointCloud = nullptr;
 	int numFrame = 0, numFrameMax;
-	uint64_t initTimeIn180k = fractionToClock(g_SystemClock->now());
+	int64_t initTimeIn180k = -1;
+	cwipc_source *source = nullptr;
 };
