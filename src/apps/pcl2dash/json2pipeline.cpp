@@ -30,7 +30,8 @@ std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
 		mkdir(subdir);
 
 	auto muxer = pipeline->addModule<Mux::GPACMuxMP4>(subdir + prefix, config->segDurInMs == 0 ? 1 : config->segDurInMs,
-		Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::SegNumStartsAtZero);
+		Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::SegNumStartsAtZero,
+		(('c' << 24) | ('w' << 16) | ('i' << 8) | '1'));
 	pipeline->connect(pclEncoder, 0, muxer, 0);
 
 	auto dasher = pipeline->addModule<Stream::MPEG_DASH>("", format("%s.mpd", g_appName), Stream::AdaptiveStreamingCommon::Live, config->segDurInMs,
