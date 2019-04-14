@@ -86,8 +86,8 @@ public:
 				}
 			}
 
-			auto out = output->getBuffer(sizeof(decltype(&frame)));
-			memcpy(out->data(), &frame, sizeof(decltype(&frame)));
+			auto out = output->getBuffer(sizeof(void*));
+			memcpy(out->data(), &frame, sizeof(void*));
 			out->setMediaTime(timeIn180k);
 			g_SystemClock->sleep(Fraction(1, 100));
 			output->emit(out);

@@ -13,8 +13,8 @@ CFLAGS+=-Isrc
 
 #------------------------------------------------------------------------------
 
-#include src/apps/pcl2dash/project.mk
-#CFLAGS+=-Iextra/include
+include src/apps/pcl2dash/project.mk
+CFLAGS+=-Iextra/include
 
 #------------------------------------------------------------------------------
 

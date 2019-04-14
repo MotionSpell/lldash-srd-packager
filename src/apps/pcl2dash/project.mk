@@ -13,3 +13,4 @@ EXE_PCL2DASH_SRCS:=\
   $(MYDIR)/cwi_pcl_encoder.cpp\
 $(MYDIR)/json_encoder_params.cpp
 $(TARGET): $(EXE_PCL2DASH_SRCS:%=$(BIN)/%.o)
+$(TARGET): LDFLAGS+=-lcwipc_codec -lcwipc_realsense2 -lcwipc_util
