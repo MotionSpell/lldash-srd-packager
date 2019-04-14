@@ -28,7 +28,7 @@ public:
 
 		char *errorMessage = nullptr;
 		if (path.empty()) {
-			auto source = cwipc_realsense2(&errorMessage);
+			source = cwipc_realsense2(&errorMessage);
 			if (!source) {
 				log(Warning, "cwipc_realsense2() error: \"%s\". Using synthetic capture source.", errorMessage ? errorMessage : "");
 				source = cwipc_synthetic();
@@ -61,6 +61,9 @@ public:
 			int64_t timeIn180k;
 			if (source) {
 				frame = cwipc_source_get(source);
+				if (!frame) {
+					log(Warning, "cwipc_read() error.");
+				}
 				if (initTimeIn180k == -1) initTimeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000000);
 				timeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000000) - initTimeIn180k;
 			} else {
@@ -73,8 +76,8 @@ public:
 				}
 			}
 
-			auto out = output->getBuffer(sizeof(decltype(frame)));
-			memcpy(out->data(), &frame, sizeof(decltype(frame)));
+			auto out = output->getBuffer(sizeof(decltype(&frame)));
+			memcpy(out->data(), &frame, sizeof(decltype(&frame)));
 			out->setMediaTime(timeIn180k);
 			g_SystemClock->sleep(Fraction(1, 100));
 			output->emit(out);

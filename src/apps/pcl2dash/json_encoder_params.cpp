@@ -4,12 +4,13 @@
 #include "lib_utils/log.hpp"
 #include "lib_utils/tools.hpp"
 #include "lib_utils/format.hpp"
-#include <cwi_encode/cwi_encode.h>
+#include "cwipc_codec/api.h" //MSVC: Warning 4275
+#include "options.hpp"
 #include <iostream>
 
 using namespace rapidjson;
 
-encoder_params parseParamFile(std::string param_file) {
+cwipc_encoder_params parseParamFile(std::string param_file) {
 	FILE *f = fopen(param_file.c_str(), "rb");
 	if (!f)
 		throw std::runtime_error(format("Error: could not open JSON file \"%s\".", param_file));
@@ -32,7 +33,7 @@ encoder_params parseParamFile(std::string param_file) {
 	}
 	fclose(f);
 
-	encoder_params pclEncoderParams;
+	CWIPC_ENCODER_PARAMS;
 	try {
 		for (auto const &dd : d.GetObject()) {
 			if (dd.name.GetString() == std::string("num_threads")) {

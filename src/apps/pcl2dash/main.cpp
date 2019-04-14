@@ -21,7 +21,7 @@ std::unique_ptr<const IConfig> processArgs(int argc, char const* argv[]) {
 	opt.add("p", "paramFile", &opts->param_file, format("JSON file containing custom encoder parameters [default=\"%s\"]", opts->param_file));
 
 	auto files = opt.parse(argc, argv);
-	if (files.size() != 1) {
+	if (files.size() > 1) {
 		Log::msg(Error, "Usage: %s [options, see below] [PCL_files_pattern]", g_appName);
 		opt.printHelp(std::cerr);
 		throw std::runtime_error("invalid command line");

@@ -1,19 +1,23 @@
 #pragma once
 
 #include "lib_modules/utils/helper.hpp"
-#include <cwi_encode/cwi_encode.h>
+#include "cwipc_codec/api.h" //MSVC: Warning 4275
 
 namespace Modules {
 class DataAVPacket;
 }
 
+//struct cwipc_encoder_params;
+//class cwipc_encoder;
+
 class CWI_PCLEncoder : public Modules::ModuleS {
 public:
-	CWI_PCLEncoder(const encoder_params &params);
+	CWI_PCLEncoder(cwipc_encoder_params params);
 	~CWI_PCLEncoder();
 	void process(Modules::Data) override;
 
 private:
 	Modules::OutputDataDefault<Modules::DataAVPacket>* output;
-	encoder_params params;
+	cwipc_encoder *encoder;
+	cwipc_encoder_params params;
 };

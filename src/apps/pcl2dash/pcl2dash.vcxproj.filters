@@ -21,8 +21,5 @@
       <Filter>CWI_modules</Filter>
     </ClInclude>
     <ClInclude Include="options.hpp" />
-    <ClInclude Include="..\..\..\extra\include\cwi_encode\cwi_encode.h">
-      <Filter>CWI_modules</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
