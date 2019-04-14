@@ -23,7 +23,7 @@ void fillVector(std::string fn, std::vector<uint8_t> &buf) {
 	auto const size = ftell(file);
 	fseek(file, 0, SEEK_SET);
 	buf.resize(size);
-	size_t read = fread(buf.data(), 1, size, file);
+	int read = (int)fread(buf.data(), 1, size, file);
 	if (read != size)
 		throw std::runtime_error(std::string("Can't read enoug data for file \"") + fn + "\" (read=" + +"bytes)");
 	fclose(file);

@@ -12,11 +12,9 @@ $(BIN)/bin2dash.so: $(BIN2DASH_SRCS:%=$(BIN)/%.o)
 TARGETS+=$(BIN)/bin2dash.so
 
 #------------------------------------------------------------------------------
-# Generic rules
-#
 $(BIN)/%.so:
 	$(CXX) $(CFLAGS) -static-libstdc++ -shared -o "$@" $^ \
 		-Wl,--no-undefined \
-		-Wl,--version-script=$(MYDIR)/plugin.version \
+		-Wl,--version-script=src/apps/bin2dash/plugin.version \
 		$(LDFLAGS)
 

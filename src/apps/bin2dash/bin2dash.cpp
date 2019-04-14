@@ -70,6 +70,7 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		auto data = safe_cast<DataAVPacket>(h->inputData);
 		auto pkt = data->getPacket();
 		data->resize(bufferSize);
+		memcpy(data->data(), buffer, bufferSize);
 		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
 		data->setMediaTime(h->timeIn180k);
 		pkt->dts = h->timeIn180k;
