@@ -26,17 +26,25 @@ public:
 	: path(path), numFrameMax(numFrameMax) {
 		output = addOutput<Modules::OutputDataDefault<Modules::DataRaw>>();
 
-		auto source = cwipc_realsense2(nullptr);
-		if (!source) {
-			source = cwipc_synthetic();
-			log(Warning, "Using synthetic capture source");
+		char *errorMessage = nullptr;
+		if (path.empty()) {
+			auto source = cwipc_realsense2(&errorMessage);
+			if (!source) {
+				log(Warning, "cwipc_realsense2() error: \"%s\". Using synthetic capture source.", errorMessage ? errorMessage : "");
+				source = cwipc_synthetic();
+				if (!source) {
+					cwipc_source_free(source);
+					throw error(format("cwipc_synthetic() error: returned NULL. Aborting."));
+				}
+			}
 		} else if (!resolvePaths(path).empty()) {
-			log(Warning, "Using file based capture with pattern from %s", path);
+			log(Warning, "Using file based capture with pattern from \"%s\".", path);
 		} else
-			throw error(format("ERROR: no realsense2 found and no file argument (\'%s\'). Check usage.", path));
+			throw error(format("Error: file argument (\"%s\") couldn't be resolved. Aborting.", path));
 	}
 
 	~MultifileReader() {
+		cwipc_source_free(source);
 	}
 
 	bool work() override {
@@ -58,7 +66,11 @@ public:
 			} else {
 				if (initTimeIn180k == -1) initTimeIn180k = fractionToClock(g_SystemClock->now());
 				timeIn180k = fractionToClock(g_SystemClock->now()) - initTimeIn180k;
-				frame = cwipc_read(paths[numFrame % paths.size()].c_str(), timeIn180k, nullptr);
+				char *errorMessage = nullptr;
+				frame = cwipc_read(paths[numFrame % paths.size()].c_str(), timeIn180k, &errorMessage);
+				if (!frame) {
+					log(Warning, "cwipc_read() error: \"%s\".", errorMessage ? errorMessage : "");
+				}
 			}
 
 			auto out = output->getBuffer(sizeof(decltype(frame)));
