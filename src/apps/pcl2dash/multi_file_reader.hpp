@@ -9,7 +9,7 @@
 #include <experimental/filesystem>
 using namespace std::experimental::filesystem::v1;
 
-#define USE_FAKE_CLOCK
+static auto const USE_FAKE_CLOCK = 1;
 
 namespace {
 
@@ -66,16 +66,18 @@ public:
 				if (!frame) {
 					log(Warning, "cwipc_read() error.");
 				}
-				if (initTimeIn180k == -1) {
-#ifndef USE_FAKE_CLOCK
-					initTimeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000000);
+
+				if (!USE_FAKE_CLOCK) {
+					if (initTimeIn180k == -1) {
+						initTimeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000000);
+					}
+					timeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000000) - initTimeIn180k;
+				}  else {
+					if (initTimeIn180k == -1) {
+						initTimeIn180k = fractionToClock(g_SystemClock->now());
+					}
+					timeIn180k = fractionToClock(g_SystemClock->now()) - initTimeIn180k;
 				}
-				timeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000000) - initTimeIn180k;
-#else
-					initTimeIn180k = fractionToClock(g_SystemClock->now());
-				}
-				timeIn180k = fractionToClock(g_SystemClock->now()) - initTimeIn180k;
-#endif
 			} else {
 				if (initTimeIn180k == -1) initTimeIn180k = fractionToClock(g_SystemClock->now());
 				timeIn180k = fractionToClock(g_SystemClock->now()) - initTimeIn180k;

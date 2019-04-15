@@ -8,7 +8,7 @@ extern "C" {
 }
 
 /*the current encoder tries to do some inter-frame encoding but is instable - this hack creates an encoder for each frame*/
-#define CWI_INTER_HACK
+static auto const CWI_INTER_HACK = 1;
 
 using namespace Modules;
 
@@ -42,11 +42,12 @@ void CWI_PCLEncoder::process(Data data) {
 	{
 		Tools::Profiler p("  Encoding time only");
 
-#ifdef CWI_INTER_HACK
-		assert(!cwipc_encoder_available(encoder, false)); /*we are already flushed*/
-		cwipc_encoder_free(encoder);
-		encoder = cwipc_new_encoder(CWIPC_ENCODER_PARAM_VERSION, &params);
-#endif
+		if(CWI_INTER_HACK)
+		{
+			assert(!cwipc_encoder_available(encoder, false)); /*we are already flushed*/
+			cwipc_encoder_free(encoder);
+			encoder = cwipc_new_encoder(CWIPC_ENCODER_PARAM_VERSION, &params);
+		}
 
 		auto pc = *((cwipc**)(data->data()));
 		cwipc_encoder_feed(encoder, pc);
