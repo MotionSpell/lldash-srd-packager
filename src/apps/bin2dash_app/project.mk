@@ -6,4 +6,5 @@ EXE_BIN2DASH_APP_SRCS:=\
   $(LIB_APPCOMMON_SRCS)\
   $(MYDIR)/main.cpp
 $(TARGET): $(EXE_BIN2DASH_APP_SRCS:%=$(BIN)/%.o)
+$(TARGET): bin/bin2dash.so
 $(TARGET): LDFLAGS+=-L$(BIN) -l:bin2dash.so
