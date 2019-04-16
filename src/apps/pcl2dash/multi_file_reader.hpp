@@ -9,7 +9,7 @@
 #include <experimental/filesystem>
 using namespace std::experimental::filesystem::v1;
 
-static auto const USE_FAKE_CLOCK = 1;
+static auto const USE_FAKE_CLOCK = 0;
 
 namespace {
 
@@ -69,9 +69,9 @@ public:
 
 				if (!USE_FAKE_CLOCK) {
 					if (initTimeIn180k == -1) {
-						initTimeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000000);
+						initTimeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000);
 					}
-					timeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000000) - initTimeIn180k;
+					timeIn180k = timescaleToClock(cwipc_timestamp(frame), 1000) - initTimeIn180k;
 				}  else {
 					if (initTimeIn180k == -1) {
 						initTimeIn180k = fractionToClock(g_SystemClock->now());
