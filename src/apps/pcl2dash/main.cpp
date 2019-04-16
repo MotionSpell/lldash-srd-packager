@@ -20,7 +20,13 @@ std::unique_ptr<const IConfig> processArgs(int argc, char const* argv[]) {
 	opt.add("d", "delayInSeg", &opts->delayInSeg, format("signed delay in segments to be deducted from the DASH startNumber [default=%s]", opts->delayInSeg));
 	opt.add("p", "paramFile", &opts->param_file, format("JSON file containing custom encoder parameters [default=\"%s\"]", opts->param_file));
 
-	auto files = opt.parse(argc, argv);
+	std::vector<std::string> files;
+	try {
+		files = opt.parse(argc, argv);
+	} catch (std::exception &e) {
+		opt.printHelp(std::cerr);
+		throw e;
+	}
 	if (files.size() > 1) {
 		Log::msg(Error, "Usage: %s [options, see below] [PCL_files_pattern]", g_appName);
 		opt.printHelp(std::cerr);

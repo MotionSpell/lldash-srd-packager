@@ -23,7 +23,13 @@ std::unique_ptr<const Config> args(int argc, char const* argv[]) {
 	opt.add("d", "durationInMs"       , &opts->segDurInMs         , format("0: segmentTimeline, otherwise SegmentNumber [default=%s]", opts->segDurInMs));
 	opt.add("s", "sleepAfterFrameInMs", &opts->sleepAfterFrameInMs, format("Sleep time in ms after each frame, used for regulation [default=%s]", opts->sleepAfterFrameInMs));
 
-	auto files = opt.parse(argc, argv);
+	std::vector<std::string> files;
+	try {
+		files = opt.parse(argc, argv);
+	} catch (std::exception &e) {
+		opt.printHelp(std::cerr);
+		throw e;
+	}
 	if (files.size() != 1) {
 		fprintf(stderr, "Usage: %s [options, see below] [file_pattern]\n", g_appName);
 		opt.printHelp(std::cerr);
