@@ -15,8 +15,10 @@ namespace {
 
 std::vector<std::string> resolvePaths(std::string path) {
 	std::vector<std::string> res;
-	for (const auto & entry : directory_iterator(path)) {
-		res.push_back(entry.path().string());
+	if (!path.empty()) {
+		for (const auto & entry : directory_iterator(path)) {
+			res.push_back(entry.path().string());
+		}
 	}
 	return res;
 }
