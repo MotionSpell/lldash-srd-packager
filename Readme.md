@@ -2,11 +2,15 @@
 
 ## CWISignalsIntegration repository
 
+### Tools
+
 This repository contains the tools used to stream Point Clouds for Pilot#1. The repository contains the following applications:
  - ```bin2dash```: dynamic-libraryfication of the encoding/streaming part of ```pcl2dash```.
  - ```bin2dash_app```: a sample app looping on compressed data using the bin2dash DLL.
  - ```pcl2dash```: capture ((device or watermelon stub) or uncompressed file), encode (CWI encoder), package (fMP4) and stream (MPEG-DASH). Used for Pilot#1.
  
+These tools are available both for Windows 10 64 bits and Ubuntu 18.04 LTS.
+
 Building this repository requires to contact Motion Spell for private code access to the Signals dependency.
 
 ## How to setup Pilot#1 easy as 1-2-3!
@@ -15,11 +19,18 @@ Building this repository requires to contact Motion Spell for private code acces
 
 Compressed (cwipc) and uncompressed (PLY) point cloud data can be found at https://baltig.viaccess-orca.com:8443/VRT/nativeclient-group/cwipc_test/releases
 
-### Pilot #1 live
+### Pilot #1 live from capture or raw PLY
 
  1. Capture: plug your hardware or download some PLY samples.
  2. HTTP server. It is highly recommended as low latency DASH may fail with your filesystem. Please install the low latency HTTP node.js server (https://github.com/gpac/node-gpac-dash) and launch it: ```node gpac-dash.js -segment-marker eods -chunk-media-segments```.
- 3. Launch ```pcl2dash``` (cf below for details) e.g. ```./pcl2dash.exe -t 1 -n -1 -s 10000 -p cwi.json folder/to/201904_loot-compressed```. If you give no folder or URL, the capture will start from the camera.
+ 3. Launch ```pcl2dash``` (cf below for details) e.g. ```./pcl2dash.exe -t 1 -n -1 -s 10000 -p cwi.json folder/to/loot-ply-uncompressed```. If you give no folder or URL, the capture will start from the camera.
+ 
+/!\ Don't use ```pcl2dash``` with compressed data!
+
+### Pilot #1 live from encoded CWIPC data
+
+ 1. HTTP server. See previous section.
+ 2. Launch ```bin2dash_app``` e.g. ```./bin2dash.exe -s 100 folder/to/cwipc_loot-compressed```. If you give no folder or URL, the capture will start from the camera.
 
 ### Developers: replay a MPEG-DASH session
 
@@ -52,7 +63,7 @@ This is useful when you want to generate data ready to be streamed (e.g. to be c
 
 ### Capture source
 
-If you give a URL, ```pcl2dash``` will open it. Otherwise it will try to get the data from the capture device (```MultiFrame.dll``` from CWI) which contains the "watermelon" fallback.
+If you give ```pcl2dash``` a URL, ```pcl2dash``` will open this URL. Otherwise it will try to get the data from the capture device (```MultiFrame.dll``` from CWI) which contains the "watermelon" fallback.
 
 ### Examples
 
@@ -96,8 +107,6 @@ The ```pcl2dash``` capture (Signals user-module) is stubbed twice. If the multiF
 
 ## Current limitations, legacy, and perspective
 
-The program is not multi-threaded due to API issues in the CWI capture/codec.
+The program is multi-threaded but due to API issues in the old CWI capture/codec. Needs to be tested.
 
-The program holds on a specific cwi branch of Signals that contains non-conformant DASH modifications for compatibility with the i2cat GUB software.
-
-The program doesn't work on Ubuntu 18.04 because the legacy CWI binaries were not provided. If pcl2dash keeps on being used, the next step is to used the new CWI API and test it again on both Windows and Linux systems.
+The program holds on a specific cwi branch of Signals that contains non-conformant DASH modifications for compatibility with the i2cat GUB software. Not needed anymore.
