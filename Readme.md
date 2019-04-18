@@ -22,10 +22,12 @@ Compressed (cwipc) and uncompressed (PLY) point cloud data can be found at https
 ### Pilot #1 live from capture or raw PLY
 
  1. Capture: plug your hardware or download some PLY samples.
- 2. HTTP server. It is highly recommended as low latency DASH may fail with your filesystem. Please install the low latency HTTP node.js server (https://github.com/gpac/node-gpac-dash) and launch it: ```node gpac-dash.js -segment-marker eods -chunk-media-segments```.
+ 2. HTTP server. It is highly recommended as low latency DASH may fail with your filesystem. Please install the low latency HTTP node.js server (https://github.com/gpac/node-gpac-dash) and launch it: ```node gpac-dash.js -segment-marker eods -no-marker-write -chunk-media-segments```.
  3. Launch ```pcl2dash``` (cf below for details) e.g. ```./pcl2dash.exe -t 1 -n -1 -s 10000 -p cwi.json folder/to/loot-ply-uncompressed```. If you give no folder or URL, the capture will start from the camera.
  
 /!\ Don't use ```pcl2dash``` with compressed data!
+
+/!\ ```pcl2dash``` sleeps 100ms between two PLY readings to avoid I/O saturation. ```bin2dash_app``` exposes customs parameters for regulation. 
 
 ### Pilot #1 live from encoded CWIPC data
 

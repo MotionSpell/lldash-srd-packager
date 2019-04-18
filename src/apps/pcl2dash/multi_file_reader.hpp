@@ -93,8 +93,10 @@ public:
 			auto out = output->getBuffer(sizeof(void*));
 			memcpy(out->data(), &frame, sizeof(void*));
 			out->setMediaTime(timeIn180k);
-			g_SystemClock->sleep(Fraction(1, 100));
 			output->emit(out);
+
+			if (!path.empty())
+				g_SystemClock->sleep(Fraction(100, 1000));
 
 			return true;
 		} else {
