@@ -1,6 +1,7 @@
 #include "../bin2dash/bin2dash.hpp"
 #include <chrono>
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
