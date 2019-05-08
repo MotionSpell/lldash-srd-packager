@@ -51,7 +51,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		auto dasher = h->pipe->addModule<Stream::MPEG_DASH>("", format("%s.mpd", name), Stream::AdaptiveStreamingCommon::Live, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
 		h->pipe->connect(muxer, 0, dasher, 0);
 
-		if (!mp4Basename.empty()) {
+		if (mp4Basename.empty()) {
 			auto sink = h->pipe->addModule<Out::HTTP>(publish_url);
 			h->pipe->connect(dasher, 0, sink, 0);
 			h->pipe->connect(dasher, 1, sink, 0, true);
