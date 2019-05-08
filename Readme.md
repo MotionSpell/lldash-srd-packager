@@ -22,7 +22,7 @@ Compressed (cwipc) and uncompressed (PLY) point cloud data can be found at https
 ### Pilot #1 live from capture or raw PLY
 
  1. Capture: plug your hardware or download some PLY samples.
- 2. HTTP server. It is highly recommended as low latency DASH may fail with your filesystem. Please install the low latency HTTP node.js server (https://github.com/gpac/node-gpac-dash) and launch it: ```node gpac-dash.js -segment-marker eods -no-marker-write -chunk-media-segments```.
+ 2. HTTP server. It is highly recommended as low latency DASH may fail with your filesystem. Please install SFU (https://baltig.viaccess-orca.com:8443/VRT/deliverymcu-group/DeliveryMCU/releases) or the low latency HTTP node.js server (https://github.com/gpac/node-gpac-dash + ```node gpac-dash.js -segment-marker eods -no-marker-write -chunk-media-segments```).
  3. Launch ```pcl2dash``` (cf below for details) e.g. ```./pcl2dash.exe -t 1 -n -1 -s 10000 -p cwi.json folder/to/loot-ply-uncompressed```. If you give no folder or URL, the capture will start from the camera.
  
 /!\ Don't use ```pcl2dash``` with compressed data!
@@ -31,7 +31,7 @@ Compressed (cwipc) and uncompressed (PLY) point cloud data can be found at https
 
 ### Pilot #1 live from encoded CWIPC data
 
- 1. HTTP server. See previous section.
+ 1. HTTP server. See previous section. Note that you can install the SFU locally if needed.
  2. Launch ```bin2dash_app``` e.g. ```./bin2dash.exe -s 100 folder/to/cwipc_loot-compressed```. If you give no folder or URL, the capture will start from the camera.
 
 ### Developers: replay a MPEG-DASH session
@@ -51,9 +51,10 @@ To generate a MP4 file from a DASH session, concatenate the initialization segme
 Usage: bin2dash_app [options, see below] [file_pattern]
     -d, --durationInMs                      0: segmentTimeline, otherwise SegmentNumber [default=10000]
     -s, --sleepAfterFrameInMs               Sleep time in ms after each frame, used for regulation [default=0]
+    -u, --publishURL                        Publish URL. If empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU. [default=""]
 ```
 
-```./pcl2dash.exe -t 30 folder/to/ply_uncompressed```
+```./pcl2dash.exe -t 30 -u http://vrt-pcl2dash.viaccess-orca.com:9000/ folder/to/ply_uncompressed```
 
 ### API
 
@@ -101,6 +102,9 @@ with cwi.json
 Stream a custom folder:
 ```./pcl2dash.exe -t 1 -n -1 -s 10000 -p cwi.json folder/to/ply_uncompressed```
 
+Stream to a server:
+```./pcl2dash.exe -t 1 -n -1 -s 10000 -p cwi.json -u http://vrt-pcl2dash.viaccess-orca.com:9000/ folder/to/ply_uncompressed```
+
 ## Stubbing
 
 The ```pcl2dash``` capture (Signals user-module) is stubbed twice. If the multiFrame.dll is found, then it is used either with a capture device when found or with the watermelon sample. If multiFrame.dll is not found then the capture will use the path pattern from the command-line.
@@ -109,6 +113,6 @@ The ```pcl2dash``` capture (Signals user-module) is stubbed twice. If the multiF
 
 ## Current limitations, legacy, and perspective
 
-The program is multi-threaded but due to API issues in the old CWI capture/codec. Needs to be tested.
+Multi-threaded works on Signals' side but needs to be tested with the CWI libraries.
 
 The program holds on a specific cwi branch of Signals that contains non-conformant DASH modifications for compatibility with the i2cat GUB software. Not needed anymore.

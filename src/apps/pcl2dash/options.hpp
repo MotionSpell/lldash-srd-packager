@@ -13,4 +13,5 @@ struct Config : IConfig {
 	int segDurInMs = 1;
 	int delayInSeg = 0;
 	std::string param_file;
+	std::string publish_url;
 };

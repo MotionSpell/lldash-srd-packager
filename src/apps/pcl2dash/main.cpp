@@ -19,6 +19,7 @@ std::unique_ptr<const IConfig> processArgs(int argc, char const* argv[]) {
 	opt.add("s", "durationInMs", &opts->segDurInMs, format("0: segmentTimeline, otherwise SegmentNumber [default=%s]", opts->segDurInMs));
 	opt.add("d", "delayInSeg", &opts->delayInSeg, format("signed delay in segments to be deducted from the DASH startNumber [default=%s]", opts->delayInSeg));
 	opt.add("p", "paramFile", &opts->param_file, format("JSON file containing custom encoder parameters [default=\"%s\"]", opts->param_file));
+	opt.add("u", "publishURL", &opts->param_file, format("Publish URL. If empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU. [default=\"%s\"]", opts->publish_url));
 
 	std::vector<std::string> files;
 	try {

@@ -14,6 +14,7 @@ struct Config {
 	std::string inputPath;
 	int segDurInMs = 10000;
 	int sleepAfterFrameInMs = 0;
+	std::string publish_url;
 };
 
 std::unique_ptr<const Config> args(int argc, char const* argv[]) {
@@ -22,6 +23,7 @@ std::unique_ptr<const Config> args(int argc, char const* argv[]) {
 
 	opt.add("d", "durationInMs"       , &opts->segDurInMs         , format("0: segmentTimeline, otherwise SegmentNumber [default=%s]", opts->segDurInMs));
 	opt.add("s", "sleepAfterFrameInMs", &opts->sleepAfterFrameInMs, format("Sleep time in ms after each frame, used for regulation [default=%s]", opts->sleepAfterFrameInMs));
+	opt.add("u", "publishURL"         , &opts->publish_url, format("Publish URL. If empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU. [default=\"%s\"]", opts->publish_url));
 
 	std::vector<std::string> files;
 	try {
@@ -43,7 +45,7 @@ std::unique_ptr<const Config> args(int argc, char const* argv[]) {
 int main(int argc, char const* argv[]) {
 	try {
 		auto config = args(argc, argv);
-		auto handle = vrt_create("vrtogether", VRT_4CC('c','w','i','1'), config->segDurInMs);
+		auto handle = vrt_create("vrtogether", VRT_4CC('c','w','i','1'), config->publish_url.c_str(), config->segDurInMs);
 
 		auto paths = resolvePaths(config->inputPath);
 		if (paths.empty())

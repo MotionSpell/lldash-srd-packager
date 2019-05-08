@@ -3,6 +3,7 @@
 
 #include "lib_pipeline/pipeline.hpp"
 #include "lib_media/mux/gpac_mux_mp4.hpp"
+#include "lib_media/out/http.hpp"
 #include "lib_media/stream/mpeg_dash.hpp"
 #include "lib_utils/os.hpp"
 #include "lib_utils/system_clock.hpp"
@@ -23,15 +24,9 @@ struct vrt_handle {
 	int64_t initTimeIn180k = fractionToClock(g_SystemClock->now()), timeIn180k = -1;
 };
 
-vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
+vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
 	try {
 		auto h = make_unique<vrt_handle>();
-
-		// Env
-		auto const prefix = Stream::AdaptiveStreamingCommon::getCommonPrefixVideo(0, Resolution(0, 0));
-		auto const subdir = prefix + "/";
-		if (!dirExists(subdir))
-			mkdir(subdir);
 
 		// Input data
 		h->inputData = make_shared<DataAVPacket>(0);
@@ -41,10 +36,26 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, int seg_dur_in_ms, in
 
 		// Pipeline
 		h->pipe = make_unique<Pipeline>(false, Pipeline::Mono);
-		auto muxer = h->inputModule = h->pipe->addModule<Mux::GPACMuxMP4>(subdir + prefix, seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms,
+		std::string mp4Basename;
+		if (!publish_url || strlen(publish_url) <= 0) {
+			auto const prefix = Stream::AdaptiveStreamingCommon::getCommonPrefixVideo(0, Resolution(0, 0));
+			auto const subdir = prefix + "/";
+			if (!dirExists(subdir))
+				mkdir(subdir);
+
+			mp4Basename = subdir + prefix;
+		}
+
+		auto muxer = h->inputModule = h->pipe->addModule<Mux::GPACMuxMP4>(mp4Basename, seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms,
 			Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::SegNumStartsAtZero, MP4_4CC);
 		auto dasher = h->pipe->addModule<Stream::MPEG_DASH>("", format("%s.mpd", name), Stream::AdaptiveStreamingCommon::Live, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
 		h->pipe->connect(muxer, 0, dasher, 0);
+
+		if (!mp4Basename.empty()) {
+			auto sink = h->pipe->addModule<Out::HTTP>(publish_url);
+			h->pipe->connect(dasher, 0, sink, 0);
+			h->pipe->connect(dasher, 1, sink, 0, true);
+		}
 
 		h->pipe->start();
 
