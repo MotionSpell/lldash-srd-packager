@@ -87,6 +87,11 @@ std::unique_ptr<const Config> args(int argc, char const* argv[]) {
 		}
 	}
 
+	if (opts->inputPath.empty()) {
+		usage();
+		throw std::runtime_error("No input path. Aborting.");
+	}
+
 	return std::move(opts);
 }
 
