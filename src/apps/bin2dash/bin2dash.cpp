@@ -3,8 +3,8 @@
 
 #include "lib_pipeline/pipeline.hpp"
 #include "lib_media/mux/gpac_mux_mp4.hpp"
-#include "lib_media/out/http.hpp"
 #include "lib_media/stream/mpeg_dash.hpp"
+#include "../common/http_poster.hpp"
 #include "lib_utils/os.hpp"
 #include "lib_utils/system_clock.hpp"
 #include <cstdio>
@@ -52,7 +52,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		h->pipe->connect(muxer, 0, dasher, 0);
 
 		if (mp4Basename.empty()) {
-			auto sink = h->pipe->addModule<Out::HTTP>(publish_url);
+			auto sink = h->pipe->addModule<HttpPoster>(publish_url);
 			h->pipe->connect(dasher, 0, sink, 0);
 			h->pipe->connect(dasher, 1, sink, 0, true);
 		}

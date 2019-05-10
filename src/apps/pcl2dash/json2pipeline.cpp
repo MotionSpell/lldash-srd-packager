@@ -1,7 +1,7 @@
 #include "lib_pipeline/pipeline.hpp"
 #include "lib_media/mux/gpac_mux_mp4.hpp"
-#include "lib_media/out/http.hpp"
 #include "lib_media/stream/mpeg_dash.hpp"
+#include "../common/http_poster.hpp"
 #include "lib_utils/os.hpp"
 #include "multi_file_reader.hpp"
 #include "cwi_pcl_encoder.hpp"
@@ -45,7 +45,7 @@ std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
 	pipeline->connect(muxer, 0, dasher, 0);
 
 	if (mp4Basename.empty()) {
-		auto sink = pipeline->addModule<Out::HTTP>(config->publish_url);
+		auto sink = pipeline->addModule<HttpPoster>(config->publish_url);
 		pipeline->connect(dasher, 0, sink, 0);
 		pipeline->connect(dasher, 1, sink, 0, true);
 	}

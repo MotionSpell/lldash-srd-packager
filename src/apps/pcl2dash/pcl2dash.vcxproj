@@ -228,6 +228,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\http_poster.hpp" />
     <ClInclude Include="cwi_pcl_encoder.hpp" />
     <ClInclude Include="multi_file_reader.hpp" />
     <ClInclude Include="options.hpp" />
