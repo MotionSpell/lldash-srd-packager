@@ -32,7 +32,7 @@ Compressed (cwipc) and uncompressed (PLY) point cloud data can be found at https
 ### Pilot #1 live from encoded CWIPC data
 
  1. HTTP server. See previous section. Note that you can install the SFU locally if needed.
- 2. Launch ```bin2dash_app``` e.g. ```./bin2dash.exe -s 100 folder/to/cwipc_loot-compressed```. If you give no folder or URL, the capture will start from the camera.
+ 2. Launch ```bin2dash_app``` e.g. ```./bin2dash_app.exe -s 100 folder/to/cwipc_loot-compressed```. If you give no folder or URL, the capture will start from the camera.
 
 ### Developers: replay a MPEG-DASH session
 
@@ -50,11 +50,11 @@ To generate a MP4 file from a DASH session, concatenate the initialization segme
 ```
 Usage: bin2dash_app [options, see below] [file_pattern]
     -d, --durationInMs                      0: segmentTimeline, otherwise SegmentNumber [default=10000]
-    -s, --sleepAfterFrameInMs               Sleep time in ms after each frame, used for regulation [default=0]
+    -t, --sleepAfterFrameInMs               Sleep time in ms after each frame, used for regulation [default=0]
     -u, --publishURL                        Publish URL. If empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU. [default=""]
 ```
 
-```./pcl2dash.exe -t 30 -u http://vrt-pcl2dash.viaccess-orca.com:9000/ folder/to/ply_uncompressed```
+```./bin2dash_app.exe -t 30 -u http://vrt-pcl2dash.viaccess-orca.com/ folder/to/cwipc_loot-compressed```
 
 ### API
 
