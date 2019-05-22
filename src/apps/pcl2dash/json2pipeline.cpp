@@ -26,6 +26,7 @@ std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
 	pipeline->connect(input, 0, pclEncoder, 0);
 
 	std::string mp4Basename;
+	auto mp4Flags = Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::SegNumStartsAtZero;
 	if (config->publish_url.empty()) {
 		auto const prefix = Stream::AdaptiveStreamingCommon::getCommonPrefixVideo(0, Resolution(0, 0));
 		auto const subdir = prefix + "/";
@@ -33,10 +34,11 @@ std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
 			mkdir(subdir);
 
 		mp4Basename = subdir + prefix;
+		mp4Flags = mp4Flags | Mux::GPACMuxMP4::FlushFragMemory;
 	}
 
 	auto muxer = pipeline->addModule<Mux::GPACMuxMP4>(mp4Basename, config->segDurInMs == 0 ? 1 : config->segDurInMs,
-		Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::SegNumStartsAtZero,
+		Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, mp4Flags,
 		(('c' << 24) | ('w' << 16) | ('i' << 8) | '1'));
 	pipeline->connect(pclEncoder, 0, muxer, 0);
 

@@ -37,6 +37,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		// Pipeline
 		h->pipe = make_unique<Pipeline>(false, Pipeline::Mono);
 		std::string mp4Basename;
+		auto mp4Flags = Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::SegNumStartsAtZero;
 		if (!publish_url || strlen(publish_url) <= 0) {
 			auto const prefix = Stream::AdaptiveStreamingCommon::getCommonPrefixVideo(0, Resolution(0, 0));
 			auto const subdir = prefix + "/";
@@ -44,10 +45,11 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 				mkdir(subdir);
 
 			mp4Basename = subdir + prefix;
+			mp4Flags = mp4Flags | Mux::GPACMuxMP4::FlushFragMemory;
 		}
 
 		auto muxer = h->inputModule = h->pipe->addModule<Mux::GPACMuxMP4>(mp4Basename, seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms,
-			Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::SegNumStartsAtZero, MP4_4CC);
+			Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, mp4Flags, MP4_4CC);
 		auto dasher = h->pipe->addModule<Stream::MPEG_DASH>("", format("%s.mpd", name), Stream::AdaptiveStreamingCommon::Live, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
 		h->pipe->connect(muxer, 0, dasher, 0);
 
