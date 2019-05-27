@@ -101,5 +101,10 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 }
 
 int64_t vrt_get_media_time(vrt_handle* h, int timescale) {
-	return convertToTimescale(h->timeIn180k, IClock::Rate, timescale);
+	try {
+		return convertToTimescale(h->timeIn180k, IClock::Rate, timescale);
+	} catch (exception const& err) {
+		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
+		fflush(stderr);
+	}
 }
