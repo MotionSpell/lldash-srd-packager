@@ -26,7 +26,10 @@ CWI_PCLEncoder::CWI_PCLEncoder(cwipc_encoder_params params)
 	//codecCtx->extradata = av_malloc(codecCtx->extradata_size);
 	output->setMetadata(make_shared<MetadataPktLibavVideo>(codecCtx));
 
-	encoder = cwipc_new_encoder(CWIPC_ENCODER_PARAM_VERSION, &params);
+	char* errorMessage = nullptr;
+	encoder = cwipc_new_encoder(CWIPC_ENCODER_PARAM_VERSION, &params, &errorMessage, CWIPC_API_VERSION);
+	if (!encoder)
+		throw error(format("cwipc_new_encoder() error (1): \"%s\".", errorMessage ? errorMessage : ""));
 }
 
 CWI_PCLEncoder::~CWI_PCLEncoder() {
@@ -42,11 +45,13 @@ void CWI_PCLEncoder::process(Data data) {
 	{
 		Tools::Profiler p("  Encoding time only");
 
-		if(CWI_INTER_HACK)
-		{
+		if(CWI_INTER_HACK) {
 			assert(!cwipc_encoder_available(encoder, false)); /*we are already flushed*/
 			cwipc_encoder_free(encoder);
-			encoder = cwipc_new_encoder(CWIPC_ENCODER_PARAM_VERSION, &params);
+			char* errorMessage = nullptr;
+			encoder = cwipc_new_encoder(CWIPC_ENCODER_PARAM_VERSION, &params, &errorMessage, CWIPC_API_VERSION);
+			if (!encoder)
+				throw error(format("cwipc_new_encoder() error (2): \"%s\".", errorMessage ? errorMessage : ""));
 		}
 
 		auto pc = *((cwipc**)(data->data()));

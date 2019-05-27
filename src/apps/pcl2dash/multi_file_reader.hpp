@@ -32,13 +32,13 @@ public:
 
 		char *errorMessage = nullptr;
 		if (path.empty()) {
-			source = cwipc_realsense2(&errorMessage);
+			source = cwipc_realsense2(nullptr, &errorMessage, CWIPC_API_VERSION);
 			if (!source) {
 				log(Warning, "cwipc_realsense2() error: \"%s\". Using synthetic capture source.", errorMessage ? errorMessage : "");
-				source = cwipc_synthetic();
+				source = cwipc_synthetic(&errorMessage, CWIPC_API_VERSION);
 				if (!source) {
 					cwipc_source_free(source);
-					throw error(format("cwipc_synthetic() error: returned NULL. Aborting."));
+					throw error(format("cwipc_synthetic() error \"%s\": returned NULL. Aborting.", errorMessage ? errorMessage : ""));
 				}
 			}
 		} else if (!resolvePaths(path).empty()) {
@@ -84,7 +84,7 @@ public:
 				if (initTimeIn180k == -1) initTimeIn180k = fractionToClock(g_SystemClock->now());
 				timeIn180k = fractionToClock(g_SystemClock->now()) - initTimeIn180k;
 				char *errorMessage = nullptr;
-				frame = cwipc_read(paths[numFrame % paths.size()].c_str(), timeIn180k, &errorMessage);
+				frame = cwipc_read(paths[numFrame % paths.size()].c_str(), timeIn180k, &errorMessage, CWIPC_API_VERSION);
 				if (!frame) {
 					log(Warning, "cwipc_read() error: \"%s\".", errorMessage ? errorMessage : "");
 				}

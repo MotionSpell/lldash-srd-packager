@@ -88,14 +88,14 @@ Custom encoding parameters:
 with cwi.json
 ```
 {
-  "num_threads": 1,
   "do_inter_frame": false,
   "gop_size": 1,
   "exp_factor": 0.0,
   "octree_bits": 7,
-  "color_bits": 8,
   "jpeg_quality": 85,
   "macroblock_size": 16
+  "tilenumber": 0,
+  "voxelsize": 0.0,
 }
 ```
 

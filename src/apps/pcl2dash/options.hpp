@@ -4,7 +4,7 @@
 #include "lib_pipeline/pipeline.hpp"
 #include <string>
 
-#define CWIPC_ENCODER_PARAMS cwipc_encoder_params pclEncoderParams { 1, false, 1, 0.0, 7, 8, 85, 16 }
+#define CWIPC_ENCODER_PARAMS cwipc_encoder_params pclEncoderParams { false, 1, 0.0, 7, 85, 16, 0, 0.0 }
 
 struct Config : IConfig {
 	std::string inputPath;

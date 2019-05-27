@@ -36,22 +36,22 @@ cwipc_encoder_params parseParamFile(std::string param_file) {
 	CWIPC_ENCODER_PARAMS;
 	try {
 		for (auto const &dd : d.GetObject()) {
-			if (dd.name.GetString() == std::string("num_threads")) {
-				pclEncoderParams.num_threads = d["num_threads"].GetInt();
-			} else if (dd.name.GetString() == std::string("do_inter_frame")) {
+			if (dd.name.GetString() == std::string("do_inter_frame")) {
 				pclEncoderParams.do_inter_frame = d["do_inter_frame"].GetBool();
 			} else if (dd.name.GetString() == std::string("gop_size")) {
 				pclEncoderParams.gop_size = d["gop_size"].GetInt();
 			} else if (dd.name.GetString() == std::string("exp_factor")) {
-				pclEncoderParams.exp_factor = d["exp_factor"].GetDouble();
+				pclEncoderParams.exp_factor = d["exp_factor"].GetFloat();
 			} else if (dd.name.GetString() == std::string("octree_bits")) {
 				pclEncoderParams.octree_bits = d["octree_bits"].GetInt();
-			} else if (dd.name.GetString() == std::string("color_bits")) {
-				pclEncoderParams.color_bits = d["color_bits"].GetInt();
 			} else if (dd.name.GetString() == std::string("jpeg_quality")) {
 				pclEncoderParams.jpeg_quality = d["jpeg_quality"].GetInt();
 			} else if (dd.name.GetString() == std::string("macroblock_size")) {
 				pclEncoderParams.macroblock_size = d["macroblock_size"].GetInt();
+			} else if (dd.name.GetString() == std::string("tilenumber")) {
+				pclEncoderParams.tilenumber = d["tilenumber"].GetInt();
+			} else if (dd.name.GetString() == std::string("voxelsize")) {
+				pclEncoderParams.voxelsize = d["voxelsize"].GetFloat();
 			} else {
 				std::cerr << "Unknown JSON: " << dd.name.GetString() << std::endl;
 			}
