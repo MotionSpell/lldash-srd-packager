@@ -27,9 +27,9 @@ VRT_EXPORT vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char
 // Destroys a pipeline. This frees all the resources.
 VRT_EXPORT void vrt_destroy(vrt_handle* h);
 
-// Pushes a buffer. The caller owns it ; the buffer  as it will be copied internally.
+// Pushes a buffer. The caller owns it ; the buffer will be copied internally.
 VRT_EXPORT bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferSize);
 
-// Gets the current media time in @timescale unit.
+// Gets the current media time in @timescale unit. Returns -1 on error.
 VRT_EXPORT int64_t vrt_get_media_time(vrt_handle* h, int timescale);
 }

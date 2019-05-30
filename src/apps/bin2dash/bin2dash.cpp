@@ -80,6 +80,11 @@ void vrt_destroy(vrt_handle* h) {
 
 bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferSize) {
 	try {
+		if (!h)
+			throw runtime_error("[vrt_push_buffer] handle can't be NULL");
+		if (!buffer)
+			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
+
 		auto data = safe_cast<DataAVPacket>(h->inputData);
 		auto pkt = data->getPacket();
 		data->resize(bufferSize);
@@ -102,9 +107,13 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 
 int64_t vrt_get_media_time(vrt_handle* h, int timescale) {
 	try {
+		if (!h)
+			throw runtime_error("[vrt_get_media_time] handle can't be NULL");
+
 		return convertToTimescale(h->timeIn180k, IClock::Rate, timescale);
 	} catch (exception const& err) {
 		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
 		fflush(stderr);
+		return -1;
 	}
 }
