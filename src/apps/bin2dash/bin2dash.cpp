@@ -45,6 +45,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 				mkdir(subdir);
 
 			mp4Basename = subdir + prefix;
+		} else {
 			mp4Flags = mp4Flags | Mux::GPACMuxMP4::FlushFragMemory;
 		}
 
@@ -54,7 +55,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		h->pipe->connect(muxer, 0, dasher, 0);
 
 		if (mp4Basename.empty()) {
-			auto sink = h->pipe->addModule<HttpPoster>(publish_url);
+			auto sink = h->pipe->addModule<HttpPoster>(publish_url, timeshift_buffer_depth_in_ms);
 			h->pipe->connect(dasher, 0, sink, 0);
 			h->pipe->connect(dasher, 1, sink, 0, true);
 		}

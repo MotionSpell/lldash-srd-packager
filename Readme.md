@@ -41,7 +41,7 @@ Pilot#1: two users. Local origin which requires to open ports locally.
 
  1. Capture: automatic fake content, plug your hardware, or download some PLY samples (see above).
  2. HTTP server. Please install SFU (https://baltig.viaccess-orca.com:8443/VRT/deliverymcu-group/DeliveryMCU/releases) ; you can install it locally or remotely.
- 3. Launch ```pcl2dash``` (cf below for details) e.g. ```./pcl2dash.exe -t 1 -n -1 -s 10000 -p cwi.json folder/to/loot-ply-uncompressed```. If you give no folder or URL, the capture will start from the camera.
+ 3. Launch ```pcl2dash``` (cf below for details) e.g. ```./pcl2dash.exe -t 1 -n -1 -s 10000 -p cwi.json folder/to/loot-ply-uncompressed -u http://localhost:9000/```. If you give no folder or URL, the capture will start from the camera.
  
 /!\ Don't user node-gpac-dash with multiple users, this will generate delays!
 
@@ -52,7 +52,7 @@ Pilot#1: two users. Local origin which requires to open ports locally.
 ## Pilot #1 and #2 live from encoded CWIPC data
 
  1. HTTP server depending on your Pilot (node-gpac-htpp for Pilot#1 or Evanescent for Pilot#2).
- 2. Launch ```bin2dash_app``` e.g. ```./bin2dash_app.exe -s 100 folder/to/cwipc_loot-compressed```. If you give no folder or URL, the capture will start from the camera.
+ 2. Launch ```bin2dash_app``` e.g. ```./bin2dash_app.exe -s 100 folder/to/cwipc_loot-compressed```. If you give no folder (all pilots) or URL (Pilot#2), the capture will start from the camera.
 
 
 

@@ -34,6 +34,7 @@ std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
 			mkdir(subdir);
 
 		mp4Basename = subdir + prefix;
+	} else {
 		mp4Flags = mp4Flags | Mux::GPACMuxMP4::FlushFragMemory;
 	}
 
@@ -47,7 +48,7 @@ std::unique_ptr<Pipeline> buildPipeline(const IConfig &iconfig) {
 	pipeline->connect(muxer, 0, dasher, 0);
 
 	if (mp4Basename.empty()) {
-		auto sink = pipeline->addModule<HttpPoster>(config->publish_url);
+		auto sink = pipeline->addModule<HttpPoster>(config->publish_url, 0);
 		pipeline->connect(dasher, 0, sink, 0);
 		pipeline->connect(dasher, 1, sink, 0, true);
 	}
