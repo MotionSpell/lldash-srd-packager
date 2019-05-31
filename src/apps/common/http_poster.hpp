@@ -100,7 +100,7 @@ private:
 		if (deleteOnServer) {
 			auto remoteDelete = [url2, this]() {
 				if (timeshiftBufferDepthInMs) {
-					std::this_thread::sleep_for(std::chrono::milliseconds());
+					std::this_thread::sleep_for(std::chrono::milliseconds(timeshiftBufferDepthInMs));
 
 					auto cmd = format("curl -X DELETE %s", url2);
 					if (system(cmd.c_str()) != 0) {
