@@ -35,7 +35,7 @@ public:
 		}
 
 		auto const meta = safe_cast<const Modules::MetadataFile>(data->getMetadata());
-		auto const url = baseURL + "/" + meta->filename;
+		auto const url = baseURL + meta->filename;
 
 		auto onFinished = [&](Modules::Data data2) {
 			auto const url2 = baseURL + safe_cast<const Modules::MetadataFile>(data2->getMetadata())->filename;

@@ -83,7 +83,7 @@ To generate a MP4 file from a DASH session, concatenate the initialization segme
 Usage: bin2dash_app [options, see below] [file_pattern]
     -d, --durationInMs                      0: segmentTimeline, otherwise SegmentNumber [default=10000]
     -s, --sleepAfterFrameInMs               Sleep time in ms after each frame, used for regulation [default=0]
-    -u, --publishURL                        Publish URL. If empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU. [default=""]
+    -u, --publishURL                        Publish URL ending with a separator. If empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU. [default=""]
 ```
 
 ```./bin2dash_app.exe -s 30 -u http://vrt-pcl2dash.viaccess-orca.com/ folder/to/cwipc_loot-compressed```
