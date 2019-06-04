@@ -25,12 +25,12 @@ std::unique_ptr<const IConfig> processArgs(int argc, char const* argv[]) {
 	try {
 		files = opt.parse(argc, argv);
 	} catch (std::exception &e) {
-		opt.printHelp(std::cerr);
+		opt.printHelp();
 		throw e;
 	}
 	if (files.size() > 1) {
 		Log::msg(Error, "Usage: %s [options, see below] [PCL_files_pattern]", g_appName);
-		opt.printHelp(std::cerr);
+		opt.printHelp();
 		throw std::runtime_error("invalid command line");
 	}
 

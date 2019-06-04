@@ -37,7 +37,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		// Pipeline
 		h->pipe = make_unique<Pipeline>(false, Pipeline::Mono);
 		std::string mp4Basename;
-		auto mp4Flags = Mux::GPACMuxMP4::ExactInputDur | Mux::GPACMuxMP4::SegNumStartsAtZero;
+		auto mp4Flags = ExactInputDur | SegNumStartsAtZero;
 		if (!publish_url || strlen(publish_url) <= 0) {
 			auto const prefix = Stream::AdaptiveStreamingCommon::getCommonPrefixVideo(0, Resolution(0, 0));
 			auto const subdir = prefix + "/";
@@ -46,18 +46,29 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 
 			mp4Basename = subdir + prefix;
 		} else {
-			mp4Flags = mp4Flags | Mux::GPACMuxMP4::FlushFragMemory;
+			mp4Flags = mp4Flags | FlushFragMemory;
 		}
 
-		auto muxer = h->inputModule = h->pipe->addModule<Mux::GPACMuxMP4>(mp4Basename, seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms,
-			Mux::GPACMuxMP4::FragmentedSegment, Mux::GPACMuxMP4::OneFragmentPerFrame, mp4Flags, MP4_4CC);
-		auto dasher = h->pipe->addModule<Stream::MPEG_DASH>("", format("%s.mpd", name), Stream::AdaptiveStreamingCommon::Live, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
-		h->pipe->connect(muxer, 0, dasher, 0);
+		Mp4MuxConfig cfg {};
+		cfg.baseName = mp4Basename;
+		cfg.segmentDurationInMs = seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms;
+		cfg.segmentPolicy = FragmentedSegment;
+		cfg.fragmentPolicy = OneFragmentPerFrame;
+		cfg.compatFlags = mp4Flags;
+		cfg.MP4_4CC = MP4_4CC;
+		auto muxer = h->inputModule = h->pipe->addModuleWithHost<Mux::GPACMuxMP4>(cfg);
+    Modules::DasherConfig dashCfg {};
+    dashCfg.mpdName = format("%s.mpd", name);
+    dashCfg.type = Stream::AdaptiveStreamingCommon::Live;
+    dashCfg.segDurationInMs = seg_dur_in_ms;
+    dashCfg.timeShiftBufferDepthInMs = timeshift_buffer_depth_in_ms;
+		auto dasher = h->pipe->add("MPEG_DASH", &dashCfg);
+		h->pipe->connect(muxer, dasher);
 
 		if (mp4Basename.empty()) {
 			auto sink = h->pipe->addModule<HttpPoster>(publish_url, timeshift_buffer_depth_in_ms);
-			h->pipe->connect(dasher, 0, sink, 0);
-			h->pipe->connect(dasher, 1, sink, 0, true);
+			h->pipe->connect(dasher, sink);
+			h->pipe->connect(GetOutputPin(dasher, 1), sink, true);
 		}
 
 		h->pipe->start();
@@ -89,7 +100,7 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		auto data = safe_cast<DataAVPacket>(h->inputData);
 		auto pkt = data->getPacket();
 		data->resize(bufferSize);
-		memcpy(data->data(), buffer, bufferSize);
+		memcpy(data->data().ptr, buffer, bufferSize);
 		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
 		data->setMediaTime(h->timeIn180k);
 		pkt->dts = h->timeIn180k;

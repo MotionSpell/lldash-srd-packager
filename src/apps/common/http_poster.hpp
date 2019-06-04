@@ -1,4 +1,5 @@
 #include "lib_media/out/http.hpp"
+#include "lib_utils/log.hpp"
 #include <atomic>
 #include <chrono>
 #include <map>
@@ -9,6 +10,10 @@
 
 auto const deleteOnServer = true;
 
+static void log(Level level, const char* msg) {
+  Log::msg(level, msg);
+}
+
 template<typename T, typename V>
 bool exists(T const& container, V const& val) {
 	return container.find(val) != container.end();
@@ -18,7 +23,7 @@ class HttpPoster : public Modules::ModuleS {
 public:
 	HttpPoster(std::string baseURL, int timeshiftBufferDepthInMs)
 	: timeshiftBufferDepthInMs(timeshiftBufferDepthInMs), baseURL(baseURL) {
-		addInput(new Modules::Input<Modules::DataBase>(this));
+		addInput(this);
 		done = false;
 	}
 	~HttpPoster() {
@@ -65,7 +70,7 @@ public:
 				throw error(format("Received zero-sized metadata but transfer is already initialized for URL: \"%s\"", url));
 
 			log(Info, format("Initialize transfer for URL: \"%s\"", url).c_str());
-			http = Modules::create<Modules::Out::HTTP>(url, Modules::Out::HTTP::Chunked);
+			http = Modules::create<Modules::Out::HTTP>(&Modules::NullHost, url, Modules::Out::HTTP::Chunked);
 			ConnectOutput(http.get(), onFinished);
 
 			http->getInput(0)->push(data);
@@ -83,7 +88,7 @@ public:
 				zeroSizeConnections[url]->getInput(0)->process();
 			} else {
 				log(Debug, format("Pushing (%s bytes) to new URL: \"%s\"", meta->filesize, url).c_str());
-				http = Modules::create<Modules::Out::HTTP>(url, Modules::Out::HTTP::Chunked);
+				http = Modules::create<Modules::Out::HTTP>(&Modules::NullHost, url, Modules::Out::HTTP::Chunked);
 				ConnectOutput(http.get(), onFinished);
 				http->getInput(0)->push(data);
 				auto th = std::thread([](std::unique_ptr<Modules::Out::HTTP> http) {

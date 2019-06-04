@@ -6,6 +6,9 @@
 
 #define CWIPC_ENCODER_PARAMS cwipc_encoder_params pclEncoderParams { false, 1, 0.0, 7, 85, 16, 0, 0.0 }
 
+struct IConfig {
+};
+
 struct Config : IConfig {
 	std::string inputPath;
 	int numFrames = std::numeric_limits<int>::max();
