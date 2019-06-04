@@ -4,8 +4,11 @@
 #include "lib_pipeline/pipeline.hpp"
 #include "lib_media/mux/gpac_mux_mp4.hpp"
 #include "lib_media/stream/mpeg_dash.hpp"
+#include "lib_media/stream/adaptive_streaming_common.hpp"
+#include "lib_media/common/attributes.hpp"
 #include "../common/http_poster.hpp"
 #include "lib_utils/os.hpp"
+#include "lib_utils/log.hpp"
 #include "lib_utils/system_clock.hpp"
 #include <cstdio>
 
@@ -19,8 +22,8 @@ using namespace std;
 
 struct vrt_handle {
 	unique_ptr<Pipeline> pipe;
-	shared_ptr<DataAVPacket> inputData;
-	IPipelinedModule *inputModule = nullptr;
+	shared_ptr<DataRaw> inputData;
+	IFilter *inputModule = nullptr;
 	int64_t initTimeIn180k = fractionToClock(g_SystemClock->now()), timeIn180k = -1;
 };
 
@@ -29,13 +32,11 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		auto h = make_unique<vrt_handle>();
 
 		// Input data
-		h->inputData = make_shared<DataAVPacket>(0);
-		auto codecCtx = shptr(avcodec_alloc_context3(nullptr));
-		codecCtx->time_base = { 1, IClock::Rate };
-		h->inputData->setMetadata(make_shared<MetadataPktLibavVideo>(codecCtx));
+		h->inputData = make_shared<DataRaw>(0);
+		h->inputData->setMetadata(make_shared<MetadataPktVideo>());
 
 		// Pipeline
-		h->pipe = make_unique<Pipeline>(false, Pipeline::Mono);
+		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::Mono);
 		std::string mp4Basename;
 		auto mp4Flags = ExactInputDur | SegNumStartsAtZero;
 		if (!publish_url || strlen(publish_url) <= 0) {
@@ -56,12 +57,12 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		cfg.fragmentPolicy = OneFragmentPerFrame;
 		cfg.compatFlags = mp4Flags;
 		cfg.MP4_4CC = MP4_4CC;
-		auto muxer = h->inputModule = h->pipe->addModuleWithHost<Mux::GPACMuxMP4>(cfg);
-    Modules::DasherConfig dashCfg {};
-    dashCfg.mpdName = format("%s.mpd", name);
-    dashCfg.type = Stream::AdaptiveStreamingCommon::Live;
-    dashCfg.segDurationInMs = seg_dur_in_ms;
-    dashCfg.timeShiftBufferDepthInMs = timeshift_buffer_depth_in_ms;
+		auto muxer = h->inputModule = h->pipe->add("GPACMuxMP4", &cfg);
+		Modules::DasherConfig dashCfg {};
+		dashCfg.mpdName = format("%s.mpd", name);
+		dashCfg.live = true;
+		dashCfg.segDurationInMs = seg_dur_in_ms;
+		dashCfg.timeShiftBufferDepthInMs = timeshift_buffer_depth_in_ms;
 		auto dasher = h->pipe->add("MPEG_DASH", &dashCfg);
 		h->pipe->connect(muxer, dasher);
 
@@ -97,18 +98,18 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		if (!buffer)
 			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
 
-		auto data = safe_cast<DataAVPacket>(h->inputData);
-		auto pkt = data->getPacket();
-		data->resize(bufferSize);
-		memcpy(data->data().ptr, buffer, bufferSize);
+		auto data = safe_cast<DataRaw>(h->inputData);
+		data->buffer->resize(bufferSize);
+		memcpy(data->buffer->data().ptr, buffer, bufferSize);
 		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
-		data->setMediaTime(h->timeIn180k);
-		pkt->dts = h->timeIn180k;
-		pkt->pts = h->timeIn180k;
-		pkt->flags |= AV_PKT_FLAG_KEY;
+		data->set(PresentationTime { h->timeIn180k });
+		data->set(DecodingTime { h->timeIn180k });
+		CueFlags cueFlags {};
+		cueFlags.keyframe = true;
+		data->set(cueFlags);
 
-		h->inputModule->getInput(0)->push(data);
-		h->inputModule->getInput(0)->process();
+//	h->inputModule->getInput(0)->push(data);
+//	h->inputModule->process();
 		return true;
 	} catch (exception const& err) {
 		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
@@ -122,7 +123,7 @@ int64_t vrt_get_media_time(vrt_handle* h, int timescale) {
 		if (!h)
 			throw runtime_error("[vrt_get_media_time] handle can't be NULL");
 
-		return convertToTimescale(h->timeIn180k, IClock::Rate, timescale);
+		return rescale(h->timeIn180k, IClock::Rate, timescale);
 	} catch (exception const& err) {
 		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
 		fflush(stderr);
