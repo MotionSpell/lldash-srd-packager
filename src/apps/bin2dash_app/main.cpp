@@ -43,7 +43,7 @@ struct Config {
 	std::string inputPath;
 	int segDurInMs = 10000;
 	int sleepAfterFrameInMs = 0;
-	std::string publish_url;
+	std::string publishUrl;
 };
 
 static void usage() {
@@ -51,7 +51,7 @@ static void usage() {
 	Config cfg;
 	fprintf(stderr, "\t-d\tdurationInMs: 0: segmentTimeline, otherwise SegmentNumber[default=%d]\n", cfg.segDurInMs);
 	fprintf(stderr, "\t-s\tsleepAfterFrameInMs: sleep time in ms after each frame, used for regulation[default=%d]\n", cfg.sleepAfterFrameInMs);
-	fprintf(stderr, "\t-u\tpublishURL: if empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU.[default=\"%s\"]\n", cfg.publish_url.c_str());
+	fprintf(stderr, "\t-u\tpublishURL: if empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU.[default=\"%s\"]\n", cfg.publishUrl.c_str());
 }
 
 Config args(int argc, char const* argv[]) {
@@ -78,8 +78,8 @@ Config args(int argc, char const* argv[]) {
 				usage();
 				throw std::runtime_error("Missing argument after \"-u\". Aborting.");
 			}
-			opts.publish_url = argv[argIdx];
-			fprintf(stderr, "Detected publish URL \"%s\"\n", opts.publish_url.c_str());
+			opts.publishUrl = argv[argIdx];
+			fprintf(stderr, "Detected publish URL \"%s\"\n", opts.publishUrl.c_str());
 		} else {
 			opts.inputPath = argv[argIdx];
 			fprintf(stderr, "Detected input path \"%s\"\n", opts.inputPath.c_str());
@@ -97,7 +97,7 @@ Config args(int argc, char const* argv[]) {
 int main(int argc, char const* argv[]) {
 	try {
 		auto config = args(argc, argv);
-		auto handle = vrt_create("vrtogether", VRT_4CC('c','w','i','1'), config.publish_url.c_str(), config.segDurInMs);
+		auto handle = vrt_create("vrtogether", VRT_4CC('c','w','i','1'), config.publishUrl.c_str(), config.segDurInMs);
 
 		auto paths = resolvePaths(config.inputPath);
 		if (paths.empty())
