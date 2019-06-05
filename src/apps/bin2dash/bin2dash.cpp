@@ -98,7 +98,7 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		if (!buffer)
 			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
 
-		auto data = safe_cast<DataRaw>(h->inputData);
+		auto data = h->inputData;
 		data->buffer->resize(bufferSize);
 		memcpy(data->buffer->data().ptr, buffer, bufferSize);
 		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
