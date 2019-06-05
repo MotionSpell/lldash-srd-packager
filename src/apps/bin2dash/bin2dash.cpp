@@ -95,6 +95,15 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 			h->pipe->connect(GetOutputPin(dasher, 1), sink, true);
 		}
 
+		{
+			auto data = make_shared<DataRaw>(0);
+			data->setMetadata(make_shared<MetadataPktVideo>());
+			data->set(PresentationTime { });
+			data->set(DecodingTime { });
+			data->set(CueFlags {});
+			h->fifo.push(data);
+		}
+
 		h->pipe->start();
 
 		return h.release();
@@ -122,7 +131,6 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
 
 		auto data = make_shared<DataRaw>(bufferSize);
-		data->setMetadata(make_shared<MetadataPktVideo>());
 		memcpy(data->buffer->data().ptr, buffer, bufferSize);
 		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
 		data->set(PresentationTime { h->timeIn180k });
