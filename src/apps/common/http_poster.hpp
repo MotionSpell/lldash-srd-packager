@@ -70,29 +70,29 @@ public:
 			}
 		};
 
-		if (meta->filesize == 0 && !meta->EOS) {
-			if (exists(zeroSizeConnections, url))
-				throw error(format("Received zero-sized metadata but transfer is already initialized for URL: \"%s\"", url));
-
-			log(Info, format("Initialize transfer for URL: \"%s\"", url).c_str());
-			HttpOutputConfig cfg {};
-			cfg.url = url;
-			http = Modules::createModule<Modules::Out::HTTP>(&Modules::NullHost, cfg);
-			ConnectOutput(http->getOutput(0), onFinished);
-
-			http->getInput(0)->push(data);
-			http->process();
-			zeroSizeConnections[url] = move(http);
+		if (exists(zeroSizeConnections, url)) {
+			log(Debug, format("Continue transfer (%s bytes) for URL: \"%s\"", meta->filesize, url).c_str());
+			if (meta->filesize) {
+				zeroSizeConnections[url]->getInput(0)->push(data);
+			}
+			if (meta->EOS) {
+				zeroSizeConnections[url]->getInput(0)->push(nullptr);
+			}
+			zeroSizeConnections[url]->process();
 		} else {
-			if (exists(zeroSizeConnections, url)) {
-				log(Debug, format("Continue transfer (%s bytes) for URL: \"%s\"", meta->filesize, url).c_str());
-				if (meta->filesize) {
-					zeroSizeConnections[url]->getInput(0)->push(data);
-				}
-				if (meta->EOS) {
-					zeroSizeConnections[url]->getInput(0)->push(nullptr);
-				}
-				zeroSizeConnections[url]->process();
+			if (!meta->EOS) {
+				if (exists(zeroSizeConnections, url))
+					throw error(format("Received zero-sized metadata but transfer is already initialized for URL: \"%s\"", url));
+
+				log(Info, format("Initialize transfer for URL: \"%s\"", url).c_str());
+				HttpOutputConfig cfg {};
+				cfg.url = url;
+				http = Modules::createModule<Modules::Out::HTTP>(&Modules::NullHost, cfg);
+				ConnectOutput(http->getOutput(0), onFinished);
+
+				http->getInput(0)->push(data);
+				http->process();
+				zeroSizeConnections[url] = move(http);
 			} else {
 				log(Debug, format("Pushing (%s bytes) to new URL: \"%s\"", meta->filesize, url).c_str());
 				HttpOutputConfig cfg {};
