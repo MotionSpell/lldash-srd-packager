@@ -11,6 +11,8 @@
 #include "lib_utils/log.hpp"
 #include "lib_utils/system_clock.hpp"
 #include <cstdio>
+#include <queue>
+#include <mutex>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -22,8 +24,31 @@ using namespace std;
 
 struct vrt_handle {
 	unique_ptr<Pipeline> pipe;
-	IFilter *inputModule = nullptr;
 	int64_t initTimeIn180k = fractionToClock(g_SystemClock->now()), timeIn180k = -1;
+	std::mutex mutex;
+	std::queue<Data> fifo;
+};
+
+struct ExternalSource : Modules::Module {
+	ExternalSource(Modules::KHost* host, vrt_handle* handle) : handle(handle) {
+		out = addOutput();
+		host->activate(true);
+	}
+	void process() override {
+		Data data;
+		{
+			std::unique_lock<std::mutex> lock(handle->mutex);
+			if(handle->fifo.empty()) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				return;
+			}
+			data = handle->fifo.front();
+			handle->fifo.pop();
+		}
+		out->post(data);
+	}
+	Modules::OutputDefault* out;
+	vrt_handle* const handle;
 };
 
 vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
@@ -31,7 +56,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		auto h = make_unique<vrt_handle>();
 
 		// Pipeline
-		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::Mono);
+		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::OnePerModule);
 		std::string mp4Basename;
 		auto mp4Flags = ExactInputDur | SegNumStartsAtZero;
 		if (!publish_url || strlen(publish_url) <= 0) {
@@ -45,6 +70,8 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 			mp4Flags = mp4Flags | FlushFragMemory;
 		}
 
+		auto source = h->pipe->addModule<ExternalSource>(h.get());
+
 		Mp4MuxConfig cfg {};
 		cfg.baseName = mp4Basename;
 		cfg.segmentDurationInMs = seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms;
@@ -52,7 +79,8 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		cfg.fragmentPolicy = OneFragmentPerFrame;
 		cfg.compatFlags = mp4Flags;
 		cfg.MP4_4CC = MP4_4CC;
-		auto muxer = h->inputModule = h->pipe->add("GPACMuxMP4", &cfg);
+		auto muxer = h->pipe->add("GPACMuxMP4", &cfg);
+		h->pipe->connect(source, muxer);
 		Modules::DasherConfig dashCfg {};
 		dashCfg.mpdName = format("%s.mpd", name);
 		dashCfg.live = true;
@@ -103,8 +131,11 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		cueFlags.keyframe = true;
 		data->set(cueFlags);
 
-//	h->inputModule->getInput(0)->push(data);
-//	h->inputModule->process();
+		{
+			std::unique_lock<std::mutex> lock(h->mutex);
+			h->fifo.push(data);
+		}
+
 		return true;
 	} catch (exception const& err) {
 		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
