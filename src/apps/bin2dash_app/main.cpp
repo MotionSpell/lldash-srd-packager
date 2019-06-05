@@ -34,7 +34,7 @@ void fillVector(std::string fn, std::vector<uint8_t> &buf) {
 	buf.resize(size);
 	int read = (int)fread(buf.data(), 1, size, file);
 	if (read != size)
-		throw std::runtime_error(std::string("Can't read enoug data for file \"") + fn + "\" (read=" + +"bytes)");
+		throw std::runtime_error(std::string("Can't read enough data for file \"") + fn + "\" (read=" + +"bytes)");
 	fclose(file);
 }
 }
