@@ -22,7 +22,6 @@ using namespace std;
 
 struct vrt_handle {
 	unique_ptr<Pipeline> pipe;
-	shared_ptr<DataRaw> inputData;
 	IFilter *inputModule = nullptr;
 	int64_t initTimeIn180k = fractionToClock(g_SystemClock->now()), timeIn180k = -1;
 };
@@ -30,10 +29,6 @@ struct vrt_handle {
 vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
 	try {
 		auto h = make_unique<vrt_handle>();
-
-		// Input data
-		h->inputData = make_shared<DataRaw>(0);
-		h->inputData->setMetadata(make_shared<MetadataPktVideo>());
 
 		// Pipeline
 		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::Mono);
@@ -98,8 +93,8 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		if (!buffer)
 			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
 
-		auto data = h->inputData;
-		data->buffer->resize(bufferSize);
+		auto data = make_shared<DataRaw>(bufferSize);
+		data->setMetadata(make_shared<MetadataPktVideo>());
 		memcpy(data->buffer->data().ptr, buffer, bufferSize);
 		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
 		data->set(PresentationTime { h->timeIn180k });
