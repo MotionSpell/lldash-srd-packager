@@ -24,18 +24,19 @@ std::vector<std::string> resolvePaths(std::string path) {
 	return res;
 }
 
-void fillVector(std::string fn, std::vector<uint8_t> &buf) {
-	auto file = fopen(fn.c_str(), "rb");
+std::vector<uint8_t> loadFile(std::string filename) {
+	auto file = fopen(filename.c_str(), "rb");
 	if (!file)
-		throw std::runtime_error(std::string("Can't open file for reading: \"") + fn + "\"");
+		throw std::runtime_error(std::string("Can't open file for reading: \"") + filename + "\"");
 	fseek(file, 0, SEEK_END);
 	auto const size = ftell(file);
 	fseek(file, 0, SEEK_SET);
-	buf.resize(size);
+	std::vector<uint8_t> buf(size);
 	int read = (int)fread(buf.data(), 1, size, file);
-	if (read != size)
-		throw std::runtime_error(std::string("Can't read enough data for file \"") + fn + "\"");
 	fclose(file);
+	if (read != size)
+		throw std::runtime_error(std::string("Can't read enough data for file \"") + filename + "\"");
+	return buf;
 }
 }
 
@@ -106,7 +107,7 @@ int main(int argc, char const* argv[]) {
 		std::vector<uint8_t> buf;
 		int64_t i = 0;
 		while (1) {
-			fillVector(paths[i % paths.size()], buf);
+			buf = loadFile(paths[i % paths.size()]);
 
 			vrt_push_buffer(handle, buf.data(), buf.size());
 
