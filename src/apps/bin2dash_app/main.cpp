@@ -103,11 +103,9 @@ int main(int argc, char const* argv[]) {
 		if (paths.empty())
 			throw std::runtime_error(std::string("No file found for path \"") + config.inputPath + "\")");
 
-		std::vector<uint8_t> buf;
 		int64_t i = 0;
 		while (1) {
-			buf = loadFile(paths[i % paths.size()]);
-
+			auto buf = loadFile(paths[i % paths.size()]);
 			vrt_push_buffer(handle, buf.data(), buf.size());
 
 			if (config.sleepAfterFrameInMs)
