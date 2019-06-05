@@ -6,7 +6,7 @@
 #include "lib_media/stream/mpeg_dash.hpp"
 #include "lib_media/stream/adaptive_streaming_common.hpp"
 #include "lib_media/common/attributes.hpp"
-#include "../common/http_poster.hpp"
+#include "http_poster.hpp"
 #include "lib_utils/os.hpp"
 #include "lib_utils/log.hpp"
 #include "lib_utils/time.hpp" //getUTC()
