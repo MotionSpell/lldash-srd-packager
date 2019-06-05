@@ -2,7 +2,6 @@
 #include <chrono>
 #include <cstdio>
 #include <cstring>
-#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -119,7 +118,7 @@ int main(int argc, char const* argv[]) {
 
 		vrt_destroy(handle);
 	} catch (std::exception const& e) {
-		std::cerr << "[" << g_appName << "] " << "Error: " << e.what() << std::endl;
+		fprintf(stderr, "[%s] Error: %s\n", g_appName, e.what());
 		return 1;
 	}
 }
