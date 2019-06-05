@@ -9,6 +9,7 @@
 #include "../common/http_poster.hpp"
 #include "lib_utils/os.hpp"
 #include "lib_utils/log.hpp"
+#include "lib_utils/time.hpp" //getUTC()
 #include "lib_utils/system_clock.hpp"
 #include <cstdio>
 #include <queue>
@@ -28,6 +29,13 @@ struct vrt_handle {
 	std::mutex mutex;
 	std::queue<Data> fifo;
 };
+
+struct UtcStartTime : IUtcStartTimeQuery {
+	uint64_t query() override { return startTime; }
+	uint64_t startTime;
+};
+
+static UtcStartTime g_UtcStartTime;
 
 struct ExternalSource : Modules::Module {
 	ExternalSource(Modules::KHost* host, vrt_handle* handle) : handle(handle) {
@@ -79,6 +87,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		cfg.fragmentPolicy = OneFragmentPerFrame;
 		cfg.compatFlags = mp4Flags;
 		cfg.MP4_4CC = MP4_4CC;
+		cfg.utcStartTime = &g_UtcStartTime;
 		auto muxer = h->pipe->add("GPACMuxMP4", &cfg);
 		h->pipe->connect(source, muxer);
 		Modules::DasherConfig dashCfg {};
@@ -103,6 +112,8 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 			data->set(CueFlags {});
 			h->fifo.push(data);
 		}
+
+		g_UtcStartTime.startTime = fractionToClock(getUTC());
 
 		h->pipe->start();
 
