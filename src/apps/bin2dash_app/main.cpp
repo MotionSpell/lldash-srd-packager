@@ -2,7 +2,6 @@
 #include <chrono>
 #include <cstdio>
 #include <cstring>
-#include <memory>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -55,8 +54,8 @@ static void usage() {
 	fprintf(stderr, "\t-u\tpublishURL: if empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU.[default=\"%s\"]\n", cfg.publish_url.c_str());
 }
 
-std::unique_ptr<const Config> args(int argc, char const* argv[]) {
-	auto opts = std::make_unique<Config>();
+Config args(int argc, char const* argv[]) {
+	Config opts;
 
 	int argIdx = 0;
 	while (++argIdx < argc) {
@@ -65,29 +64,29 @@ std::unique_ptr<const Config> args(int argc, char const* argv[]) {
 				usage();
 				throw std::runtime_error("Missing argument after \"-d\". Aborting.");
 			}
-			opts->segDurInMs = atoi(argv[argIdx]);
-			fprintf(stderr, "Detected segment duration of %dms\n", opts->segDurInMs);
+			opts.segDurInMs = atoi(argv[argIdx]);
+			fprintf(stderr, "Detected segment duration of %dms\n", opts.segDurInMs);
 		} else if (!strcmp("-s", argv[argIdx])) {
 			if (++argIdx >= argc) {
 				usage();
 				throw std::runtime_error("Missing argument after \"-s\". Aborting.");
 			}
-			opts->sleepAfterFrameInMs = atoi(argv[argIdx]);
-			fprintf(stderr, "Detected sleep after frame of %dms\n", opts->sleepAfterFrameInMs);
+			opts.sleepAfterFrameInMs = atoi(argv[argIdx]);
+			fprintf(stderr, "Detected sleep after frame of %dms\n", opts.sleepAfterFrameInMs);
 		} else if (!strcmp("-u", argv[argIdx])) {
 			if (++argIdx >= argc) {
 				usage();
 				throw std::runtime_error("Missing argument after \"-u\". Aborting.");
 			}
-			opts->publish_url = argv[argIdx];
-			fprintf(stderr, "Detected publish URL \"%s\"\n", opts->publish_url.c_str());
+			opts.publish_url = argv[argIdx];
+			fprintf(stderr, "Detected publish URL \"%s\"\n", opts.publish_url.c_str());
 		} else {
-			opts->inputPath = argv[argIdx];
-			fprintf(stderr, "Detected input path \"%s\"\n", opts->inputPath.c_str());
+			opts.inputPath = argv[argIdx];
+			fprintf(stderr, "Detected input path \"%s\"\n", opts.inputPath.c_str());
 		}
 	}
 
-	if (opts->inputPath.empty()) {
+	if (opts.inputPath.empty()) {
 		usage();
 		throw std::runtime_error("No input path. Aborting.");
 	}
@@ -98,11 +97,11 @@ std::unique_ptr<const Config> args(int argc, char const* argv[]) {
 int main(int argc, char const* argv[]) {
 	try {
 		auto config = args(argc, argv);
-		auto handle = vrt_create("vrtogether", VRT_4CC('c','w','i','1'), config->publish_url.c_str(), config->segDurInMs);
+		auto handle = vrt_create("vrtogether", VRT_4CC('c','w','i','1'), config.publish_url.c_str(), config.segDurInMs);
 
-		auto paths = resolvePaths(config->inputPath);
+		auto paths = resolvePaths(config.inputPath);
 		if (paths.empty())
-			throw std::runtime_error(std::string("No file found for path \"") + config->inputPath + "\")");
+			throw std::runtime_error(std::string("No file found for path \"") + config.inputPath + "\")");
 
 		std::vector<uint8_t> buf;
 		int64_t i = 0;
@@ -111,8 +110,8 @@ int main(int argc, char const* argv[]) {
 
 			vrt_push_buffer(handle, buf.data(), buf.size());
 
-			if (config->sleepAfterFrameInMs)
-				std::this_thread::sleep_for(std::chrono::milliseconds(config->sleepAfterFrameInMs));
+			if (config.sleepAfterFrameInMs)
+				std::this_thread::sleep_for(std::chrono::milliseconds(config.sleepAfterFrameInMs));
 
 			i++;
 		}
