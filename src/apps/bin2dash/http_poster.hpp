@@ -43,7 +43,7 @@ struct HttpSink : Modules::ModuleS {
 				}
 				toErase.clear();
 			}
-	
+
 			auto const url = baseURL + meta->filename;
 
 			auto onFinished = [&](Modules::Data data2) {
@@ -68,7 +68,7 @@ struct HttpSink : Modules::ModuleS {
 					}
 				}
 			};
-	
+
 			if (exists(zeroSizeConnections, url)) {
 				m_host->log(Debug, format("Continue transfer (%s bytes) for URL: \"%s\"", meta->filesize, url).c_str());
 				if (meta->filesize) {
@@ -82,13 +82,13 @@ struct HttpSink : Modules::ModuleS {
 				if (!meta->EOS) {
 					if (exists(zeroSizeConnections, url))
 						throw Modules::error(format("Received zero-sized metadata but transfer is already initialized for URL: \"%s\"", url));
-	
+
 					m_host->log(Info, format("Initialize transfer for URL: \"%s\"", url).c_str());
 					HttpOutputConfig cfg {};
 					cfg.url = url;
 					http = Modules::createModule<Modules::Out::HTTP>(&Modules::NullHost, cfg);
 					ConnectOutput(http->getOutput(0), onFinished);
-	
+
 					http->getInput(0)->push(data);
 					http->process();
 					zeroSizeConnections[url] = move(http);
@@ -111,20 +111,18 @@ struct HttpSink : Modules::ModuleS {
 	private:
 
 		void asyncRemoteDelete(string url2) {
-			if (deleteOnServer) {
-				auto remoteDelete = [url2, this]() {
-					if (timeshiftBufferDepthInMs) {
-						this_thread::sleep_for(chrono::milliseconds(timeshiftBufferDepthInMs));
+			auto remoteDelete = [url2, this]() {
+				if (timeshiftBufferDepthInMs) {
+					this_thread::sleep_for(chrono::milliseconds(timeshiftBufferDepthInMs));
 
-						auto cmd = format("curl -X DELETE %s", url2);
-						if (system(cmd.c_str()) != 0) {
-							m_host->log(Debug, format("command %s failed", cmd).c_str());
-						}
+					auto cmd = format("curl -X DELETE %s", url2);
+					if (system(cmd.c_str()) != 0) {
+						m_host->log(Debug, format("command %s failed", cmd).c_str());
 					}
-				};
-				auto th = thread(remoteDelete);
-				th.detach();
-			}
+				}
+			};
+			auto th = thread(remoteDelete);
+			th.detach();
 		}
 
 		Modules::KHost* const m_host;
