@@ -99,7 +99,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		h->pipe->connect(muxer, dasher);
 
 		if (mp4Basename.empty()) {
-			auto sink = h->pipe->addModule<HttpPoster>(publish_url, timeshift_buffer_depth_in_ms);
+			auto sink = h->pipe->addModule<HttpSink>(publish_url, timeshift_buffer_depth_in_ms);
 			h->pipe->connect(dasher, sink);
 			h->pipe->connect(GetOutputPin(dasher, 1), sink, true);
 		}
