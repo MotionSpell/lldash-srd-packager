@@ -23,13 +23,13 @@ bool exists(T const& container, V const& val) {
 	return container.find(val) != container.end();
 }
 
-struct HttpSink : Modules::ModuleS {
-		HttpSink(Modules::KHost* host, string baseURL, int timeshiftBufferDepthInMs)
+struct HttpSink2 : Modules::ModuleS {
+		HttpSink2(Modules::KHost* host, string baseURL, int timeshiftBufferDepthInMs)
 		: m_host(host),
 			timeshiftBufferDepthInMs(timeshiftBufferDepthInMs), baseURL(baseURL) {
 			done = false;
 		}
-		~HttpSink() {
+		~HttpSink2() {
 			done = true;
 		}
 		void processOne(Modules::Data data) override {
