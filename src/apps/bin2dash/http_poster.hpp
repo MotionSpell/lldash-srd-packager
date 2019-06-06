@@ -87,7 +87,7 @@ struct HttpSink2 : Modules::ModuleS {
 						throw Modules::error(format("Received zero-sized metadata but transfer is already initialized for URL: \"%s\"", url));
 
 					m_host->log(Info, format("Initialize transfer for URL: \"%s\"", url).c_str());
-					http = Modules::createModule<Modules::Out::HTTP>(&Modules::NullHost, httpConfig);
+					http = Modules::createModule<Modules::Out::HTTP>(m_host, httpConfig);
 					ConnectOutput(http->getOutput(0), onFinished);
 
 					http->getInput(0)->push(data);
@@ -95,7 +95,7 @@ struct HttpSink2 : Modules::ModuleS {
 					zeroSizeConnections[url] = move(http);
 				} else {
 					m_host->log(Debug, format("Pushing (%s bytes) to new URL: \"%s\"", meta->filesize, url).c_str());
-					http = Modules::createModule<Modules::Out::HTTP>(&Modules::NullHost, httpConfig);
+					http = Modules::createModule<Modules::Out::HTTP>(m_host, httpConfig);
 					ConnectOutput(http->getOutput(0), onFinished);
 					http->getInput(0)->push(data);
 					auto th = thread([](unique_ptr<Modules::Out::HTTP> http) {
