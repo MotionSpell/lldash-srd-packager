@@ -111,14 +111,15 @@ struct HttpSink : Modules::ModuleS {
 	private:
 
 		void asyncRemoteDelete(string url2) {
-			auto remoteDelete = [url2, this]() {
-				if (timeshiftBufferDepthInMs) {
-					this_thread::sleep_for(chrono::milliseconds(timeshiftBufferDepthInMs));
+			auto remoteDelete = [url2,this]() {
+				if (!timeshiftBufferDepthInMs)
+          return;
 
-					auto cmd = format("curl -X DELETE %s", url2);
-					if (system(cmd.c_str()) != 0) {
-						m_host->log(Debug, format("command %s failed", cmd).c_str());
-					}
+				this_thread::sleep_for(chrono::milliseconds(timeshiftBufferDepthInMs));
+
+				auto cmd = format("curl -X DELETE %s", url2);
+				if(system(cmd.c_str()) != 0) {
+					m_host->log(Warning, format("command %s failed", cmd).c_str());
 				}
 			};
 			auto th = thread(remoteDelete);
