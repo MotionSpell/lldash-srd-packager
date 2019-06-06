@@ -15,10 +15,6 @@
 #include <queue>
 #include <mutex>
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-}
-
 using namespace Modules;
 using namespace Pipelines;
 using namespace std;
