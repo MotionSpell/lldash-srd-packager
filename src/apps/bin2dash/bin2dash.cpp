@@ -2,8 +2,9 @@
 #include "bin2dash.hpp"
 
 #include "lib_pipeline/pipeline.hpp"
+#include "lib_media/out/http.hpp"
 #include "lib_media/mux/gpac_mux_mp4.hpp"
-#include "lib_media/stream/mpeg_dash.hpp"
+#include "plugins/Dasher/mpeg_dash.hpp"
 #include "lib_media/stream/adaptive_streaming_common.hpp"
 #include "lib_media/common/attributes.hpp"
 #include "http_poster.hpp"
@@ -95,7 +96,11 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 		h->pipe->connect(muxer, dasher);
 
 		if (mp4Basename.empty()) {
-			auto sink = h->pipe->addModule<HttpSink2>(publish_url, timeshift_buffer_depth_in_ms);
+			HttpOutputConfig sinkCfg {};
+			sinkCfg.url = publish_url;
+			sinkCfg.userAgent = "bin2dash";
+
+			auto sink = h->pipe->add("HttpSink", &sinkCfg);
 			h->pipe->connect(dasher, sink);
 			h->pipe->connect(GetOutputPin(dasher, 1), sink, true);
 		}
