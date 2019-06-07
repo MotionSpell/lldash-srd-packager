@@ -40,6 +40,7 @@ std::vector<uint8_t> loadFile(std::string filename) {
 }
 
 struct Config {
+	bool help = false;
 	std::string inputPath;
 	int segDurInMs = 10000;
 	int sleepAfterFrameInMs = 0;
@@ -54,40 +55,37 @@ static void usage() {
 	fprintf(stderr, "\t-u\tpublishURL: if empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU.[default=\"%s\"]\n", cfg.publishUrl.c_str());
 }
 
-Config args(int argc, char const* argv[]) {
+Config parseCommandLine(int argc, char const* argv[]) {
 	Config opts;
 
 	int argIdx = 0;
-	while (++argIdx < argc) {
-		if (!strcmp("-d", argv[argIdx])) {
-			if (++argIdx >= argc) {
-				usage();
-				throw std::runtime_error("Missing argument after \"-d\". Aborting.");
-			}
-			opts.segDurInMs = atoi(argv[argIdx]);
-			fprintf(stderr, "Detected segment duration of %dms\n", opts.segDurInMs);
-		} else if (!strcmp("-s", argv[argIdx])) {
-			if (++argIdx >= argc) {
-				usage();
-				throw std::runtime_error("Missing argument after \"-s\". Aborting.");
-			}
-			opts.sleepAfterFrameInMs = atoi(argv[argIdx]);
-			fprintf(stderr, "Detected sleep after frame of %dms\n", opts.sleepAfterFrameInMs);
-		} else if (!strcmp("-u", argv[argIdx])) {
-			if (++argIdx >= argc) {
-				usage();
-				throw std::runtime_error("Missing argument after \"-u\". Aborting.");
-			}
-			opts.publishUrl = argv[argIdx];
-			fprintf(stderr, "Detected publish URL \"%s\"\n", opts.publishUrl.c_str());
-		} else {
-			opts.inputPath = argv[argIdx];
-			fprintf(stderr, "Detected input path \"%s\"\n", opts.inputPath.c_str());
+
+	auto pop = [&]() {
+		if (argIdx >= argc)
+			throw std::runtime_error("Incomplete command line");
+		return std::string(argv[argIdx++]);
+	};
+
+	while (argIdx < argc) {
+		auto const word = pop();
+
+		if (word == "-h" || word == "--help"){
+			opts.help = true;
+			usage();
+			return opts;
 		}
+
+		if (word == "-d")
+			opts.segDurInMs = atoi(pop().c_str());
+		else if (word == "-s")
+			opts.sleepAfterFrameInMs = atoi(pop().c_str());
+		else if (word == "-u")
+			opts.publishUrl = pop();
+		else
+			opts.inputPath = word;
 	}
 
 	if (opts.inputPath.empty()) {
-		usage();
 		throw std::runtime_error("No input path. Aborting.");
 	}
 
@@ -96,7 +94,9 @@ Config args(int argc, char const* argv[]) {
 
 int main(int argc, char const* argv[]) {
 	try {
-		auto config = args(argc, argv);
+		auto config = parseCommandLine(argc, argv);
+		if(config.help)
+			return 0;
 		auto handle = vrt_create("vrtogether", VRT_4CC('c','w','i','1'), config.publishUrl.c_str(), config.segDurInMs);
 
 		auto paths = resolvePaths(config.inputPath);
