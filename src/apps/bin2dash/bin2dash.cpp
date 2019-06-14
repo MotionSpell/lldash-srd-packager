@@ -22,7 +22,8 @@ using namespace std;
 
 struct vrt_handle {
 	unique_ptr<Pipeline> pipe;
-	int64_t initTimeIn180k = fractionToClock(g_SystemClock->now()), timeIn180k = -1;
+	int64_t initTimeIn180k = fractionToClock(g_SystemClock->now());
+	int64_t timeIn180k = -1;
 	std::mutex mutex;
 	std::queue<Data> fifo;
 };
@@ -142,9 +143,10 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		if (!buffer)
 			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
 
+		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
+
 		auto data = make_shared<DataRaw>(bufferSize);
 		memcpy(data->buffer->data().ptr, buffer, bufferSize);
-		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
 		data->set(PresentationTime { h->timeIn180k });
 		data->set(DecodingTime { h->timeIn180k });
 		CueFlags cueFlags {};
