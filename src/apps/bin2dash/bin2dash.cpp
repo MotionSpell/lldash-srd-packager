@@ -45,6 +45,7 @@ struct ExternalSource : Modules::Module {
 		{
 			std::unique_lock<std::mutex> lock(handle->mutex);
 			if(handle->fifo.empty()) {
+				lock.unlock();
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 				return;
 			}
