@@ -12,20 +12,19 @@
 #include "lib_utils/log.hpp"
 #include "lib_utils/time.hpp" //getUTC()
 #include "lib_utils/system_clock.hpp"
+#include "lib_utils/queue_lockfree.hpp"
 #include <cstdio>
-#include <queue>
-#include <mutex>
 
 using namespace Modules;
 using namespace Pipelines;
 using namespace std;
 
 struct vrt_handle {
+  vrt_handle() : fifo(256) {}
 	unique_ptr<Pipeline> pipe;
 	int64_t initTimeIn180k = fractionToClock(g_SystemClock->now());
 	int64_t timeIn180k = -1;
-	std::mutex mutex;
-	std::queue<Data> fifo;
+	QueueLockFree<Data> fifo;
 };
 
 struct UtcStartTime : IUtcStartTimeQuery {
@@ -42,15 +41,9 @@ struct ExternalSource : Modules::Module {
 	}
 	void process() override {
 		Data data;
-		{
-			std::unique_lock<std::mutex> lock(handle->mutex);
-			if(handle->fifo.empty()) {
-				lock.unlock();
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
-				return;
-			}
-			data = handle->fifo.front();
-			handle->fifo.pop();
+		if(!handle->fifo.read(data)) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			return;
 		}
 		out->post(data);
 	}
@@ -113,7 +106,7 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 			data->set(PresentationTime { });
 			data->set(DecodingTime { });
 			data->set(CueFlags {});
-			h->fifo.push(data);
+			h->fifo.write(data);
 		}
 
 		g_UtcStartTime.startTime = fractionToClock(getUTC());
@@ -153,11 +146,7 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 		CueFlags cueFlags {};
 		cueFlags.keyframe = true;
 		data->set(cueFlags);
-
-		{
-			std::unique_lock<std::mutex> lock(h->mutex);
-			h->fifo.push(data);
-		}
+		h->fifo.write(data);
 
 		return true;
 	} catch (exception const& err) {
