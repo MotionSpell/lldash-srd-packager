@@ -102,7 +102,9 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 
 		{
 			auto data = make_shared<DataRaw>(0);
-			data->setMetadata(make_shared<MetadataPktVideo>());
+			auto meta = make_shared<MetadataPktVideo>();
+			meta->timeScale = Fraction(1000, 1);
+			data->setMetadata(meta);
 			data->set(PresentationTime { });
 			data->set(DecodingTime { });
 			data->set(CueFlags {});
