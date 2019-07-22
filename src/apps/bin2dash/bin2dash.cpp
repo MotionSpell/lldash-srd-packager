@@ -6,8 +6,8 @@
 #include "lib_media/mux/gpac_mux_mp4.hpp"
 #include "plugins/Dasher/mpeg_dash.hpp"
 #include "lib_media/stream/adaptive_streaming_common.hpp"
+#include "lib_media/out/http_sink.hpp"
 #include "lib_media/common/attributes.hpp"
-#include "http_poster.hpp"
 #include "lib_utils/os.hpp"
 #include "lib_utils/log.hpp"
 #include "lib_utils/time.hpp" //getUTC()
