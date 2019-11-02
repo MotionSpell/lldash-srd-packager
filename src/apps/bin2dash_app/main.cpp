@@ -6,9 +6,7 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include <experimental/filesystem>
-
-using namespace std::experimental::filesystem::v1;
+#include <filesystem>
 
 const char *g_appName = "bin2dash_app";
 
@@ -16,7 +14,7 @@ namespace {
 std::vector<std::string> resolvePaths(std::string path) {
 	std::vector<std::string> res;
 	if (!path.empty()) {
-		for (const auto & entry : directory_iterator(path)) {
+		for (const auto & entry : std::filesystem::directory_iterator(path)) {
 			res.push_back(entry.path().string());
 		}
 	}

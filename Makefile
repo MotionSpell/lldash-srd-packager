@@ -10,6 +10,7 @@ CFLAGS+=-fPIC
 
 include signals/Makefile
 CFLAGS+=-Isrc
+CFLAGS+=-std=c++17 # filesystem - put after Signals Makefile
 
 #------------------------------------------------------------------------------
 
