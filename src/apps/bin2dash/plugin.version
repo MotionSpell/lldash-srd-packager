@@ -2,10 +2,10 @@ FOO {
   # explicitly list symbols to be exported
   global:
 
-    vrt_create;
+    vrt_create_ext;
     vrt_destroy;
-    vrt_push_buffer;
-    vrt_get_media_time;
+    vrt_push_buffer_ext;
+    vrt_get_media_time_ext;
 
   # hide everything else
   local: *;

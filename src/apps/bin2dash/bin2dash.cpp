@@ -20,11 +20,16 @@ using namespace Pipelines;
 using namespace std;
 
 struct vrt_handle {
-  vrt_handle() : fifo(256) {}
+	vrt_handle(int num_streams) : streams(num_streams) {}
 	unique_ptr<Pipeline> pipe;
-	int64_t initTimeIn180k = fractionToClock(g_SystemClock->now());
-	int64_t timeIn180k = -1;
-	QueueLockFree<Data> fifo;
+
+	struct Stream {
+		Stream() : fifo(256) {}
+		int64_t initTimeIn180k = fractionToClock(g_SystemClock->now());
+		int64_t timeIn180k = -1;
+		QueueLockFree<Data> fifo;
+	};
+	std::vector<Stream> streams;
 };
 
 struct UtcStartTime : IUtcStartTimeQuery {
@@ -35,28 +40,30 @@ struct UtcStartTime : IUtcStartTimeQuery {
 static UtcStartTime g_UtcStartTime;
 
 struct ExternalSource : Modules::Module {
-	ExternalSource(Modules::KHost* host, vrt_handle* handle) : handle(handle) {
+	ExternalSource(Modules::KHost* host, QueueLockFree<Data> &fifo) : fifo(fifo) {
 		out = addOutput();
 		host->activate(true);
 	}
 	void process() override {
 		Data data;
-		if(!handle->fifo.read(data)) {
+		if(!fifo.read(data)) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			return;
 		}
 		out->post(data);
 	}
 	Modules::OutputDefault* out;
-	vrt_handle* const handle;
+	QueueLockFree<Data> &fifo;
 };
 
-vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
+vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
 	try {
-		auto h = make_unique<vrt_handle>();
+		auto h = make_unique<vrt_handle>(num_streams);
 
 		// Pipeline
 		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::OnePerModule);
+
+		// Build parameters
 		std::string mp4Basename;
 		auto mp4Flags = ExactInputDur | SegNumStartsAtZero;
 		if (!publish_url || strlen(publish_url) <= 0) {
@@ -70,26 +77,18 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 			mp4Flags = mp4Flags | FlushFragMemory;
 		}
 
-		auto source = h->pipe->addModule<ExternalSource>(h.get());
-
-		Mp4MuxConfig cfg {};
-		cfg.baseName = mp4Basename;
-		cfg.segmentDurationInMs = seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms;
-		cfg.segmentPolicy = FragmentedSegment;
-		cfg.fragmentPolicy = OneFragmentPerFrame;
-		cfg.compatFlags = mp4Flags;
-		cfg.MP4_4CC = MP4_4CC;
-		cfg.utcStartTime = &g_UtcStartTime;
-		auto muxer = h->pipe->add("GPACMuxMP4", &cfg);
-		h->pipe->connect(source, muxer);
+		// Create Dasher
 		Modules::DasherConfig dashCfg {};
 		dashCfg.mpdName = format("%s.mpd", name);
 		dashCfg.live = true;
 		dashCfg.segDurationInMs = seg_dur_in_ms;
 		dashCfg.timeShiftBufferDepthInMs = timeshift_buffer_depth_in_ms;
+		if (num_streams > 1)
+			for (int stream = 0; stream < num_streams; ++stream)
+				dashCfg.tileInfo.push_back({ 1, (int)streams[stream].tileNumber, 0, (int)streams[stream].quality, 0 });
 		auto dasher = h->pipe->add("MPEG_DASH", &dashCfg);
-		h->pipe->connect(muxer, dasher);
-
+		
+		// Create sink
 		if (mp4Basename.empty()) {
 			HttpOutputConfig sinkCfg {};
 			sinkCfg.url = publish_url;
@@ -100,15 +99,29 @@ vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char* publish_u
 			h->pipe->connect(GetOutputPin(dasher, 1), sink, true);
 		}
 
-		{
+		for (int stream = 0; stream < num_streams; ++stream) {
+			auto source = h->pipe->addModule<ExternalSource>(h->streams[stream].fifo);
+
+			Mp4MuxConfig cfg {};
+			cfg.baseName = mp4Basename;
+			cfg.segmentDurationInMs = seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms;
+			cfg.segmentPolicy = FragmentedSegment;
+			cfg.fragmentPolicy = OneFragmentPerFrame;
+			cfg.compatFlags = mp4Flags;
+			cfg.MP4_4CC = streams[stream].MP4_4CC;
+			cfg.utcStartTime = &g_UtcStartTime;
+			auto muxer = h->pipe->add("GPACMuxMP4", &cfg);
+			h->pipe->connect(source, muxer);
+			h->pipe->connect(muxer, GetInputPin(dasher, stream));
+
 			auto data = make_shared<DataRaw>(0);
 			auto meta = make_shared<MetadataPktVideo>();
 			meta->timeScale = Fraction(1000, 1);
 			data->setMetadata(meta);
-			data->set(PresentationTime { });
-			data->set(DecodingTime { });
-			data->set(CueFlags {});
-			h->fifo.write(data);
+			data->set(PresentationTime{ });
+			data->set(DecodingTime{ });
+			data->set(CueFlags{});
+			h->streams[stream].fifo.write(data);
 		}
 
 		g_UtcStartTime.startTime = fractionToClock(getUTC());
@@ -132,23 +145,25 @@ void vrt_destroy(vrt_handle* h) {
 	}
 }
 
-bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferSize) {
+bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize) {
 	try {
 		if (!h)
 			throw runtime_error("[vrt_push_buffer] handle can't be NULL");
 		if (!buffer)
 			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
+		if (stream_index < 0 || stream_index >= h->streams.size())
+			throw runtime_error("[vrt_push_buffer] invalid stream_index");
 
-		h->timeIn180k = fractionToClock(g_SystemClock->now()) - h->initTimeIn180k;
+		h->streams[stream_index].timeIn180k = fractionToClock(g_SystemClock->now()) - h->streams[stream_index].initTimeIn180k;
 
 		auto data = make_shared<DataRaw>(bufferSize);
 		memcpy(data->buffer->data().ptr, buffer, bufferSize);
-		data->set(PresentationTime { h->timeIn180k });
-		data->set(DecodingTime { h->timeIn180k });
+		data->set(PresentationTime { h->streams[stream_index].timeIn180k });
+		data->set(DecodingTime { h->streams[stream_index].timeIn180k });
 		CueFlags cueFlags {};
 		cueFlags.keyframe = true;
 		data->set(cueFlags);
-		h->fifo.write(data);
+		h->streams[stream_index].fifo.write(data);
 
 		return true;
 	} catch (exception const& err) {
@@ -158,12 +173,14 @@ bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferS
 	}
 }
 
-int64_t vrt_get_media_time(vrt_handle* h, int timescale) {
+int64_t vrt_get_media_time_ext(vrt_handle* h, int stream_index, int timescale) {
 	try {
 		if (!h)
 			throw runtime_error("[vrt_get_media_time] handle can't be NULL");
+		if (stream_index < 0 || stream_index >= h->streams.size())
+			throw runtime_error("[vrt_push_buffer] invalid stream_index");
 
-		return rescale(h->timeIn180k, IClock::Rate, timescale);
+		return rescale(h->streams[stream_index].timeIn180k, IClock::Rate, timescale);
 	} catch (exception const& err) {
 		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
 		fflush(stderr);
