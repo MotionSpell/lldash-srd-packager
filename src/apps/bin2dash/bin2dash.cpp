@@ -33,7 +33,7 @@ struct vrt_handle {
 };
 
 struct UtcStartTime : IUtcStartTimeQuery {
-	uint64_t query() override { return startTime; }
+	uint64_t query() const override { return startTime; }
 	uint64_t startTime;
 };
 
