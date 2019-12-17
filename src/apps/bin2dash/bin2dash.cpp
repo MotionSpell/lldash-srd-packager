@@ -136,6 +136,11 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 	}
 }
 
+vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char *publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
+	streamDesc sd = { MP4_4CC, 0, 0 };
+	return vrt_create_ext(name, 1, &sd, publish_url, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
+}
+
 void vrt_destroy(vrt_handle* h) {
 	try {
 		delete h;
@@ -173,6 +178,10 @@ bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer
 	}
 }
 
+bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferSize) {
+	return vrt_push_buffer_ext(h, 0, buffer, bufferSize);
+}
+
 int64_t vrt_get_media_time_ext(vrt_handle* h, int stream_index, int timescale) {
 	try {
 		if (!h)
@@ -187,3 +196,8 @@ int64_t vrt_get_media_time_ext(vrt_handle* h, int stream_index, int timescale) {
 		return -1;
 	}
 }
+
+int64_t vrt_get_media_time(vrt_handle* h, int timescale) {
+	return vrt_get_media_time_ext(h, 0, timescale);
+}
+
