@@ -95,7 +95,8 @@ int main(int argc, char const* argv[]) {
 		auto config = parseCommandLine(argc, argv);
 		if(config.help)
 			return 0;
-		auto handle = vrt_create("vrtogether", VRT_4CC('c','w','i','1'), config.publishUrl.c_str(), config.segDurInMs);
+		streamDesc sd = { VRT_4CC('c','w','i','1'), 0, 0 };
+		auto handle = vrt_create("vrtogether", 1, &sd, config.publishUrl.c_str(), config.segDurInMs);
 
 		auto paths = resolvePaths(config.inputPath);
 		if (paths.empty())
@@ -104,7 +105,7 @@ int main(int argc, char const* argv[]) {
 		int64_t i = 0;
 		while (1) {
 			auto buf = loadFile(paths[i % paths.size()]);
-			vrt_push_buffer(handle, buf.data(), buf.size());
+			vrt_push_buffer(handle, 0, buf.data(), buf.size());
 
 			if (config.sleepAfterFrameInMs)
 				std::this_thread::sleep_for(std::chrono::milliseconds(config.sleepAfterFrameInMs));

@@ -56,7 +56,7 @@ struct ExternalSource : Modules::Module {
 	QueueLockFree<Data> &fifo;
 };
 
-vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
+vrt_handle* vrt_create(const char* name, int num_streams, const streamDesc *streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
 	try {
 		auto h = make_unique<vrt_handle>(num_streams);
 
@@ -145,13 +145,13 @@ void vrt_destroy(vrt_handle* h) {
 	}
 }
 
-bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize) {
+bool vrt_push_buffer(vrt_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize) {
 	try {
 		if (!h)
 			throw runtime_error("[vrt_push_buffer] handle can't be NULL");
 		if (!buffer)
 			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
-		if (stream_index < 0 || stream_index >= h->streams.size())
+		if (stream_index < 0 || stream_index >= (int)h->streams.size())
 			throw runtime_error("[vrt_push_buffer] invalid stream_index");
 
 		h->streams[stream_index].timeIn180k = fractionToClock(g_SystemClock->now()) - h->streams[stream_index].initTimeIn180k;
@@ -173,11 +173,11 @@ bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer
 	}
 }
 
-int64_t vrt_get_media_time_ext(vrt_handle* h, int stream_index, int timescale) {
+int64_t vrt_get_media_time(vrt_handle* h, int stream_index, int timescale) {
 	try {
 		if (!h)
 			throw runtime_error("[vrt_get_media_time] handle can't be NULL");
-		if (stream_index < 0 || stream_index >= h->streams.size())
+		if (stream_index < 0 || stream_index >= (int)h->streams.size())
 			throw runtime_error("[vrt_push_buffer] invalid stream_index");
 
 		return rescale(h->streams[stream_index].timeIn180k, IClock::Rate, timescale);

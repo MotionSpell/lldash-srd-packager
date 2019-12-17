@@ -28,30 +28,14 @@ struct streamDesc {
 // Creates a new packager/streamer and starts the streaming session.
 // @streams: owned by caller
 // The returned pipeline must be freed using vrt_destroy().
-VRT_EXPORT vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000);
-
-// Deprecated.
-static vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000) {
-	streamDesc sd = { MP4_4CC, 0, 0 };
-	return vrt_create_ext(name, 1, &sd, publish_url, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
-}
+VRT_EXPORT vrt_handle* vrt_create(const char* name, int num_streams, const streamDesc *streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000);
 
 // Destroys a pipeline. This frees all the resources.
 VRT_EXPORT void vrt_destroy(vrt_handle* h);
 
 // Pushes a buffer to @stream_index. The caller owns it ; the buffer will be copied internally.
-VRT_EXPORT bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize);
-
-// Deprecated.
-static bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferSize) {
-	return vrt_push_buffer_ext(h, 0, buffer, bufferSize);
-}
+VRT_EXPORT bool vrt_push_buffer(vrt_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize);
 
 // Gets the current media time in @timescale unit for @stream_index. Returns -1 on error.
-VRT_EXPORT int64_t vrt_get_media_time_ext(vrt_handle* h, int stream_index, int timescale);
-
-// Deprecated.
-static int64_t vrt_get_media_time(vrt_handle* h, int timescale) {
-	return vrt_get_media_time_ext(h, 0, timescale);
-}
+VRT_EXPORT int64_t vrt_get_media_time(vrt_handle* h, int stream_index, int timescale);
 }
