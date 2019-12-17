@@ -151,7 +151,7 @@ bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer
 			throw runtime_error("[vrt_push_buffer] handle can't be NULL");
 		if (!buffer)
 			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
-		if (stream_index < 0 || stream_index >= h->streams.size())
+		if (stream_index < 0 || stream_index >= (int)h->streams.size())
 			throw runtime_error("[vrt_push_buffer] invalid stream_index");
 
 		h->streams[stream_index].timeIn180k = fractionToClock(g_SystemClock->now()) - h->streams[stream_index].initTimeIn180k;
@@ -177,7 +177,7 @@ int64_t vrt_get_media_time_ext(vrt_handle* h, int stream_index, int timescale) {
 	try {
 		if (!h)
 			throw runtime_error("[vrt_get_media_time] handle can't be NULL");
-		if (stream_index < 0 || stream_index >= h->streams.size())
+		if (stream_index < 0 || stream_index >= (int)h->streams.size())
 			throw runtime_error("[vrt_push_buffer] invalid stream_index");
 
 		return rescale(h->streams[stream_index].timeIn180k, IClock::Rate, timescale);
