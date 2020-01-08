@@ -13,11 +13,13 @@
 #include "lib_utils/time.hpp" //getUTC()
 #include "lib_utils/system_clock.hpp"
 #include "lib_utils/queue_lockfree.hpp"
+#include <chrono>
 #include <cstdio>
 
 using namespace Modules;
 using namespace Pipelines;
 using namespace std;
+using namespace chrono;
 
 struct vrt_handle {
 	vrt_handle(int num_streams) : streams(num_streams) {}
@@ -31,13 +33,6 @@ struct vrt_handle {
 	};
 	std::vector<Stream> streams;
 };
-
-struct UtcStartTime : IUtcStartTimeQuery {
-	uint64_t query() const override { return startTime; }
-	uint64_t startTime;
-};
-
-static UtcStartTime g_UtcStartTime;
 
 struct ExternalSource : Modules::Module {
 	ExternalSource(Modules::KHost* host, QueueLockFree<Data> &fifo) : fifo(fifo) {
@@ -83,6 +78,7 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 		dashCfg.live = true;
 		dashCfg.segDurationInMs = seg_dur_in_ms;
 		dashCfg.timeShiftBufferDepthInMs = timeshift_buffer_depth_in_ms;
+		dashCfg.initialOffsetInMs = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		if (num_streams > 1)
 			for (int stream = 0; stream < num_streams; ++stream)
 				dashCfg.tileInfo.push_back({ 1, (int)streams[stream].tileNumber, 0, (int)streams[stream].quality, 0 });
@@ -109,7 +105,6 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 			cfg.fragmentPolicy = OneFragmentPerFrame;
 			cfg.compatFlags = mp4Flags;
 			cfg.MP4_4CC = streams[stream].MP4_4CC;
-			cfg.utcStartTime = &g_UtcStartTime;
 			auto muxer = h->pipe->add("GPACMuxMP4", &cfg);
 			h->pipe->connect(source, muxer);
 			h->pipe->connect(muxer, GetInputPin(dasher, stream));
@@ -123,8 +118,6 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 			data->set(CueFlags{});
 			h->streams[stream].fifo.write(data);
 		}
-
-		g_UtcStartTime.startTime = fractionToClock(getUTC());
 
 		h->pipe->start();
 
