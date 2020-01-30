@@ -23,7 +23,6 @@ using namespace chrono;
 
 struct vrt_handle {
 	vrt_handle(int num_streams) : streams(num_streams) {}
-	unique_ptr<Pipeline> pipe;
 
 	struct Stream {
 		Stream() : fifo(256) {}
@@ -31,7 +30,9 @@ struct vrt_handle {
 		int64_t timeIn180k = -1;
 		QueueLockFree<Data> fifo;
 	};
-	std::vector<Stream> streams;
+	vector<Stream> streams;
+
+	unique_ptr<Pipeline> pipe;
 };
 
 struct ExternalSource : Modules::Module {
@@ -42,7 +43,7 @@ struct ExternalSource : Modules::Module {
 	void process() override {
 		Data data;
 		if(!fifo.read(data)) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			this_thread::sleep_for(chrono::milliseconds(10));
 			return;
 		}
 		out->post(data);
@@ -59,7 +60,7 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::OnePerModule);
 
 		// Build parameters
-		std::string mp4Basename;
+		string mp4Basename;
 		auto mp4Flags = ExactInputDur | SegNumStartsAtZero;
 		if (!publish_url || strlen(publish_url) <= 0) {
 			auto const prefix = Stream::AdaptiveStreamingCommon::getCommonPrefixVideo(0, Resolution(0, 0));
