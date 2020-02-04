@@ -110,7 +110,7 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 			h->pipe->connect(source, muxer);
 			h->pipe->connect(muxer, GetInputPin(dasher, stream));
 
-			auto data = make_shared<DataRaw>(0);
+			auto data = make_shared<DataBaseRef>(nullptr);
 			auto meta = make_shared<MetadataPktVideo>();
 			meta->timeScale = Fraction(1000, 1);
 			data->setMetadata(meta);
