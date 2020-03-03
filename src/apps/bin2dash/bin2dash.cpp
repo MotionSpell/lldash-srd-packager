@@ -6,6 +6,7 @@
 #include "lib_media/mux/gpac_mux_mp4.hpp"
 #include "plugins/Dasher/mpeg_dash.hpp"
 #include "lib_media/stream/adaptive_streaming_common.hpp"
+#include "lib_media/out/filesystem.hpp"
 #include "lib_media/out/http_sink.hpp"
 #include "lib_media/common/attributes.hpp"
 #include "lib_utils/os.hpp"
@@ -52,8 +53,13 @@ struct ExternalSource : Modules::Module {
 	QueueLockFree<Data> &fifo;
 };
 
+static bool startsWith(string s, string prefix) {
+  return s.substr(0, prefix.size()) == prefix;
+}
+
 vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
 	try {
+		setGlobalLogLevel(Info);
 		auto h = make_unique<vrt_handle>(num_streams);
 
 		// Pipeline
@@ -62,15 +68,15 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 		// Build parameters
 		string mp4Basename;
 		auto mp4Flags = ExactInputDur | SegNumStartsAtZero;
-		if (!publish_url || strlen(publish_url) <= 0) {
+		if(startsWith(publish_url, "http")) {
+			mp4Flags = mp4Flags | FlushFragMemory;
+		} else {
 			auto const prefix = Stream::AdaptiveStreamingCommon::getCommonPrefixVideo(0, Resolution(0, 0));
 			auto const subdir = prefix + "/";
 			if (!dirExists(subdir))
 				mkdir(subdir);
 
 			mp4Basename = subdir + prefix;
-		} else {
-			mp4Flags = mp4Flags | FlushFragMemory;
 		}
 
 		// Create Dasher
@@ -86,7 +92,7 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 		auto dasher = h->pipe->add("MPEG_DASH", &dashCfg);
 		
 		// Create sink
-		if (mp4Basename.empty()) {
+		if(startsWith(publish_url, "http")) {
 			HttpOutputConfig sinkCfg {};
 			sinkCfg.url = publish_url;
 			sinkCfg.userAgent = "bin2dash";
@@ -94,6 +100,12 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 			auto sink = h->pipe->add("HttpSink", &sinkCfg);
 			h->pipe->connect(dasher, sink);
 			h->pipe->connect(GetOutputPin(dasher, 1), sink, true);
+			g_Log->log(Info, format("Pushing to HTTP at \"%s\"", publish_url).c_str());
+		} else {
+			FileSystemSinkConfig sinkCfg { publish_url };
+			auto sink = h->pipe->add("FileSystemSink", &sinkCfg);
+			h->pipe->connect(GetOutputPin(dasher, 1), sink);
+			g_Log->log(Info, format("Pushing to filesystem at \"%s\"", publish_url).c_str());
 		}
 
 		for (int stream = 0; stream < num_streams; ++stream) {

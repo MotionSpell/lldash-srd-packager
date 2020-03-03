@@ -42,7 +42,7 @@ struct Config {
 	std::string inputPath;
 	int segDurInMs = 2000;
 	int sleepAfterFrameInMs = 200;
-	std::string publishUrl = "http://127.0.0.1:9000/bin2dash/";
+	std::string publishUrl = ".";
 };
 
 static void usage() {
