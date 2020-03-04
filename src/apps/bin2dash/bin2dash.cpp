@@ -66,7 +66,6 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::OnePerModule);
 
 		// Build parameters
-		string mp4Basename;
 		auto mp4Flags = ExactInputDur | SegNumStartsAtZero;
 		if(startsWith(publish_url, "http")) {
 			mp4Flags = mp4Flags | FlushFragMemory;
@@ -75,8 +74,6 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 			auto const subdir = prefix + "/";
 			if (!dirExists(subdir))
 				mkdir(subdir);
-
-			mp4Basename = subdir + prefix;
 		}
 
 		// Create Dasher
@@ -92,27 +89,26 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 		auto dasher = h->pipe->add("MPEG_DASH", &dashCfg);
 		
 		// Create sink
+		IFilter* sink = nullptr;
 		if(startsWith(publish_url, "http")) {
 			HttpOutputConfig sinkCfg {};
 			sinkCfg.url = publish_url;
 			sinkCfg.userAgent = "bin2dash";
-
-			auto sink = h->pipe->add("HttpSink", &sinkCfg);
-			h->pipe->connect(dasher, sink);
-			h->pipe->connect(GetOutputPin(dasher, 1), sink, true);
+			sink = h->pipe->add("HttpSink", &sinkCfg);
 			g_Log->log(Info, format("Pushing to HTTP at \"%s\"", publish_url).c_str());
 		} else {
-			FileSystemSinkConfig sinkCfg { publish_url };
-			auto sink = h->pipe->add("FileSystemSink", &sinkCfg);
-			h->pipe->connect(GetOutputPin(dasher, 1), sink);
+			FileSystemSinkConfig sinkCfg {};
+			sinkCfg.directory = publish_url;
+			sink = h->pipe->add("FileSystemSink", &sinkCfg);
 			g_Log->log(Info, format("Pushing to filesystem at \"%s\"", publish_url).c_str());
 		}
+		h->pipe->connect(dasher, sink);
+		h->pipe->connect(GetOutputPin(dasher, 1), sink, true);
 
 		for (int stream = 0; stream < num_streams; ++stream) {
 			auto source = h->pipe->addModule<ExternalSource>(h->streams[stream].fifo);
 
 			Mp4MuxConfig cfg {};
-			cfg.baseName = mp4Basename;
 			cfg.segmentDurationInMs = seg_dur_in_ms == 0 ? 1 : seg_dur_in_ms;
 			cfg.segmentPolicy = FragmentedSegment;
 			cfg.fragmentPolicy = OneFragmentPerFrame;
