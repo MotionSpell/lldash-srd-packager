@@ -80,12 +80,16 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 		Modules::DasherConfig dashCfg {};
 		dashCfg.mpdName = format("%s.mpd", name);
 		dashCfg.live = true;
+		dashCfg.forceRealDurations = true;
 		dashCfg.segDurationInMs = seg_dur_in_ms;
 		dashCfg.timeShiftBufferDepthInMs = timeshift_buffer_depth_in_ms;
 		dashCfg.initialOffsetInMs = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		if (num_streams > 1)
 			for (int stream = 0; stream < num_streams; ++stream)
-				dashCfg.tileInfo.push_back({ 1, (int)streams[stream].tileNumber, 0, (int)streams[stream].quality, 0 });
+				dashCfg.tileInfo.push_back({ 0, streams[stream].objectX,
+					streams[stream].objectY, streams[stream].objectWidth,
+					streams[stream].objectHeight, streams[stream].totalWidth,
+					streams[stream].totalHeight });
 		auto dasher = h->pipe->add("MPEG_DASH", &dashCfg);
 		
 		// Create sink
@@ -139,7 +143,7 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 }
 
 vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char *publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
-	streamDesc sd = { MP4_4CC, 0, 0 };
+	streamDesc sd = { MP4_4CC, 0, 0, 1, 1, 1, 1 };
 	return vrt_create_ext(name, 1, &sd, publish_url, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
 }
 

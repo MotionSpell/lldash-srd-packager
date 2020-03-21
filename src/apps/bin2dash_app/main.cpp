@@ -95,7 +95,25 @@ int main(int argc, char const* argv[]) {
 		auto config = parseCommandLine(argc, argv);
 		if(config.help)
 			return 0;
-		auto handle = vrt_create("vrtogether", VRT_4CC('c','w','i','1'), config.publishUrl.c_str(), config.segDurInMs);
+
+		auto const numQuality = 2;
+		auto const numTiles = 3;
+		auto const numStreams = numQuality * numTiles;
+		streamDesc desc[numStreams] = {};
+		for (int q=0; q<numQuality; ++q) {
+			for (int t=0; t<numTiles; ++t) {
+				auto &d = desc[q*numTiles+t];
+				d.MP4_4CC = VRT_4CC('c','w','i','1');
+				d.objectX = t;
+				d.objectY = 0;
+				d.objectWidth = 1;
+				d.objectHeight = 1;
+				d.totalWidth = numTiles;
+				d.totalHeight = 1;
+			}
+		}
+
+		auto handle = vrt_create_ext("vrtogether", numStreams, desc, config.publishUrl.c_str(), config.segDurInMs);
 
 		auto paths = resolvePaths(config.inputPath);
 		if (paths.empty())
@@ -104,7 +122,8 @@ int main(int argc, char const* argv[]) {
 		int64_t i = 0;
 		while (1) {
 			auto buf = loadFile(paths[i % paths.size()]);
-			vrt_push_buffer(handle, buf.data(), buf.size());
+			for (int j=0; j<numStreams; ++j)
+				vrt_push_buffer_ext(handle, j, buf.data(), buf.size());
 
 			if (config.sleepAfterFrameInMs)
 				std::this_thread::sleep_for(std::chrono::milliseconds(config.sleepAfterFrameInMs));
