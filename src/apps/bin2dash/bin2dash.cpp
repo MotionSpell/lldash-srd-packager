@@ -9,6 +9,7 @@
 #include "lib_media/out/filesystem.hpp"
 #include "lib_media/out/http_sink.hpp"
 #include "lib_media/common/attributes.hpp"
+#include "lib_utils/format.hpp"
 #include "lib_utils/os.hpp"
 #include "lib_utils/log.hpp"
 #include "lib_utils/time.hpp" //getUTC()
@@ -57,8 +58,11 @@ static bool startsWith(string s, string prefix) {
   return s.substr(0, prefix.size()) == prefix;
 }
 
-vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
+vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, const char *api_version) {
 	try {
+		if (strcmp(api_version, BIN2DASH_API_VERSION))
+			throw std::runtime_error(format("Inconsistent API version between compilation (%s) and runtime (%s). Aborting.", BIN2DASH_API_VERSION, api_version).c_str());
+
 		setGlobalLogLevel(Info);
 		auto h = make_unique<vrt_handle>(num_streams);
 

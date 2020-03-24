@@ -22,5 +22,13 @@ include src/apps/bin2dash_app/project.mk
 
 #------------------------------------------------------------------------------
 
-targets: $(TARGETS)
+$(BIN)/bin2dash_version.mk:
+	$(SRC)/../scripts/version.sh > $(BIN)/bin2dash_version.h
+	@echo "" > "$@"
+CFLAGS+=-I$(BIN)
+ifneq ($(MAKECMDGOALS),clean)
+include $(BIN)/bin2dash_version.mk
+endif
+
+targets: $(TARGETS) $(BIN)/bin2dash_version.h
 
