@@ -23,6 +23,7 @@ include src/apps/bin2dash_app/project.mk
 #------------------------------------------------------------------------------
 
 $(BIN)/bin2dash_version.mk:
+	@mkdir -p $(BIN)
 	$(SRC)/../scripts/version.sh > $(BIN)/bin2dash_version.h
 	@echo "" > "$@"
 CFLAGS+=-I$(BIN)
