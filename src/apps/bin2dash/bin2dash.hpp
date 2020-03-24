@@ -22,13 +22,13 @@ struct vrt_handle;
 struct streamDesc {
     uint32_t MP4_4CC; // codec identifier. Build with VRT_4CC(). For example VRT_4CC('c','w','i','1') for "cwi1".
 
-	/*MPEG-DASH SRD parameters*/
-	int objectX;
-	int objectY;
-	int objectWidth;
-	int objectHeight;
-	int totalWidth;
-	int totalHeight;
+    /*MPEG-DASH SRD parameters*/
+    uint32_t objectX;
+    uint32_t objectY;
+    uint32_t objectWidth;
+    uint32_t objectHeight;
+    uint32_t totalWidth;
+    uint32_t totalHeight;
 };
 
 // Creates a new packager/streamer and starts the streaming session.

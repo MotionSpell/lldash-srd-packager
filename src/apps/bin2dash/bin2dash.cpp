@@ -86,10 +86,10 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 		dashCfg.initialOffsetInMs = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		if (num_streams > 1)
 			for (int stream = 0; stream < num_streams; ++stream)
-				dashCfg.tileInfo.push_back({ 0, streams[stream].objectX,
-					streams[stream].objectY, streams[stream].objectWidth,
-					streams[stream].objectHeight, streams[stream].totalWidth,
-					streams[stream].totalHeight });
+				dashCfg.tileInfo.push_back({ 0, (int)streams[stream].objectX,
+					(int)streams[stream].objectY, (int)streams[stream].objectWidth,
+					(int)streams[stream].objectHeight, (int)streams[stream].totalWidth,
+					(int)streams[stream].totalHeight });
 		auto dasher = h->pipe->add("MPEG_DASH", &dashCfg);
 		
 		// Create sink
