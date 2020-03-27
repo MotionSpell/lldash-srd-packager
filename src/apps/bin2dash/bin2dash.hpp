@@ -21,7 +21,7 @@ extern "C" {
 // Opaque handle.
 struct vrt_handle;
 
-struct streamDesc {
+struct StreamDesc {
     uint32_t MP4_4CC; // codec identifier. Build with VRT_4CC(). For example VRT_4CC('c','w','i','1') for "cwi1".
 
     /*MPEG-DASH SRD parameters*/
@@ -36,7 +36,7 @@ struct streamDesc {
 // Creates a new packager/streamer and starts the streaming session.
 // @streams: owned by caller
 // The returned pipeline must be freed using vrt_destroy().
-VRT_EXPORT vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000, uint64_t api_version = BIN2DASH_API_VERSION);
+VRT_EXPORT vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc*streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000, uint64_t api_version = BIN2DASH_API_VERSION);
 
 // Deprecated.
 VRT_EXPORT vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000);

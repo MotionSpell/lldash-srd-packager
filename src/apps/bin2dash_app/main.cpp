@@ -99,7 +99,7 @@ int main(int argc, char const* argv[]) {
 		auto const numQuality = 2;
 		auto const numTiles = 3;
 		auto const numStreams = numQuality * numTiles;
-		streamDesc desc[numStreams] = {};
+		StreamDesc desc[numStreams] = {};
 		for (int q=0; q<numQuality; ++q) {
 			for (int t=0; t<numTiles; ++t) {
 				auto &d = desc[q*numTiles+t];

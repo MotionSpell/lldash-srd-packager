@@ -58,7 +58,7 @@ static bool startsWith(string s, string prefix) {
   return s.substr(0, prefix.size()) == prefix;
 }
 
-vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, uint64_t api_version) {
+vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc*streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, uint64_t api_version) {
 	try {
 		if (api_version != BIN2DASH_API_VERSION)
 			throw std::runtime_error(format("Inconsistent API version between compilation (%s) and runtime (%s). Aborting.", BIN2DASH_API_VERSION, api_version).c_str());
@@ -147,7 +147,7 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const streamDesc *
 }
 
 vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char *publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
-	streamDesc sd = { MP4_4CC, 0, 0, 1, 1, 1, 1 };
+	StreamDesc sd = { MP4_4CC, 0, 0, 1, 1, 1, 1 };
 	return vrt_create_ext(name, 1, &sd, publish_url, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
 }
 
