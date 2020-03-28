@@ -99,17 +99,22 @@ int main(int argc, char const* argv[]) {
 		auto const numQuality = 2;
 		auto const numTiles = 3;
 		auto const numStreams = numQuality * numTiles;
+		printf("%d stream(s)\n", numStreams);
 		StreamDesc desc[numStreams] = {};
 		for (int q=0; q<numQuality; ++q) {
 			for (int t=0; t<numTiles; ++t) {
 				auto &d = desc[q*numTiles+t];
 				d.MP4_4CC = VRT_4CC('c','w','i','1');
-				d.objectX = t;
-				d.objectY = 0;
+				d.objectX = q;
+				d.objectY = t;
 				d.objectWidth = 1;
 				d.objectHeight = 1;
 				d.totalWidth = numTiles;
-				d.totalHeight = 1;
+				d.totalHeight = numTiles;
+
+				auto fourCC = (char*)&d.MP4_4CC;
+				printf("\t stream %d: 4CC=%c%c%c%c, SRD { %u, %u, %u, %u, %u, %u }\n", q*numTiles+t, fourCC[0], fourCC[1], fourCC[2], fourCC[3],
+					d.objectX, d.objectY, d.objectWidth, d.objectHeight, d.totalWidth, d.totalHeight);
 			}
 		}
 
