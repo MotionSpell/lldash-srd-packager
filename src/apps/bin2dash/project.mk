@@ -14,7 +14,5 @@ TARGETS+=$(BIN)/bin2dash.so
 #------------------------------------------------------------------------------
 $(BIN)/%.so:
 	$(CXX) $(CFLAGS) -static-libstdc++ -shared -o "$@" $^ \
-		-Wl,--no-undefined \
-		-Wl,--version-script=src/apps/bin2dash/plugin.version \
 		$(LDFLAGS)
 
