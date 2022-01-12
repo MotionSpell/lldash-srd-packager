@@ -85,6 +85,7 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc*s
 		dashCfg.mpdName = format("%s.mpd", name);
 		dashCfg.live = true;
 		dashCfg.forceRealDurations = true;
+        dashCfg.presignalNextSegment = true;
 		dashCfg.segDurationInMs = seg_dur_in_ms;
 		dashCfg.timeShiftBufferDepthInMs = timeshift_buffer_depth_in_ms;
 		dashCfg.initialOffsetInMs = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
