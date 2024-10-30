@@ -8,4 +8,4 @@ EXE_BIN2DASH_APP_SRCS:=\
 $(TARGET): $(EXE_BIN2DASH_APP_SRCS:%=$(BIN)/%.o)
 $(TARGET): $(BIN)/bin2dash.so
 $(TARGET): LDFLAGS+=-L$(BIN) $(BIN)/bin2dash.so
-CFLAGS+=-std=c++17
+CXXFLAGS+=-std=c++17
