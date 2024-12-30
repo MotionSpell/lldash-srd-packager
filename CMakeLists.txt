@@ -14,6 +14,49 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
 endif()
 
+# Change some compiler options that are dependent on the target platform.
+# xxxjack some are actually dependent on the toolchain...
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    add_compile_options(-Wall -Wextra -Werror -fvisibility=default -fvisibility-inlines-hidden -Wno-deprecated-declarations)
+    set(BIN2DASH_LINK_FLAGS "-Wl,--no-undefined -Wl,--version-script=${BIN2DASH_SRC}/apps/bin2dash/plugin.version")
+
+    # Debug-specific options
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_compile_options(-g3)
+    endif()
+
+    # Release-specific options
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_compile_options(-w -DNDEBUG)
+    endif()
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    add_compile_options(-Wall -Wextra -Werror -fvisibility=default -fvisibility-inlines-hidden -Wno-deprecated-declarations)
+    set(BIN2DASH_LINK_FLAGS "")
+    # Debug-specific options
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_compile_options(-g3)
+    endif()
+
+    # Release-specific options
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_compile_options(-w -DNDEBUG)
+    endif()
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    add_compile_options(-Wall -Wextra -Werror -fvisibility=default -fvisibility-inlines-hidden -Wno-deprecated-declarations)
+    set(BIN2DASH_LINK_FLAGS "-Wl,--no-undefined -Wl,--version-script=${BIN2DASH_SRC}/apps/bin2dash/plugin.version")
+    # Debug-specific options
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_compile_options(-g3)
+    endif()
+
+    # Release-specific options
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_compile_options(-w -DNDEBUG)
+    endif()
+else()
+    message(FATAL_ERROR " Unknown CMAKE_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}")
+endif()
+
 # Define the source directory for bin2dash
 set(BIN2DASH_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -38,7 +81,7 @@ set_target_properties(bin2dash PROPERTIES
     OUTPUT_NAME "bin2dash"
     PREFIX ""
     SUFFIX ".so"
-    LINK_FLAGS "-Wl,--no-undefined -Wl,--version-script=${BIN2DASH_SRC}/apps/bin2dash/plugin.version"
+    LINK_FLAGS "${BIN2DASH_LINK_FLAGS}"
 )
 
 # Add bin2dash_app executable
