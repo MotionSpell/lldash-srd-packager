@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.15)
 
 project(bin2dash VERSION 1.0 LANGUAGES CXX)
 
+
+# Define the source directory for bin2dash
+set(BIN2DASH_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -56,9 +60,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 else()
     message(FATAL_ERROR " Unknown CMAKE_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}")
 endif()
-
-# Define the source directory for bin2dash
-set(BIN2DASH_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Add bin2dash shared library
 add_library(bin2dash SHARED
