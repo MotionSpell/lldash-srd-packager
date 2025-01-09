@@ -78,10 +78,12 @@ target_link_libraries(bin2dash
     PRIVATE signals::utils
 )
 
-#set_target_properties(bin2dash PROPERTIES
-#    PREFIX ""
-#    LINK_FLAGS "${BIN2DASH_LINK_FLAGS}"
-#)
+set_target_properties(bin2dash PROPERTIES
+    OUTPUT_NAME "bin2dash"
+    PREFIX ""
+    SUFFIX ".so"
+    LINK_FLAGS "${BIN2DASH_LINK_FLAGS}"
+)
 
 # Add bin2dash_app executable
 add_executable(bin2dash_app
