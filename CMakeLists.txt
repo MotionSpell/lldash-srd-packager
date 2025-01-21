@@ -79,11 +79,10 @@ target_link_libraries(bin2dash
 )
 
 set_target_properties(bin2dash PROPERTIES
-    OUTPUT_NAME "bin2dash"
-    PREFIX ""
-    SUFFIX ".so"
     LINK_FLAGS "${BIN2DASH_LINK_FLAGS}"
 )
+
+signals_install_plugin(bin2dash ".so")
 
 # Add bin2dash_app executable
 add_executable(bin2dash_app
@@ -101,21 +100,4 @@ target_link_libraries(bin2dash_app
     PRIVATE bin2dash
 )
 
-set_target_properties(bin2dash_app PROPERTIES
-    OUTPUT_NAME "bin2dash_app"
-    SUFFIX ".exe"
-)
-
-# Install bin2dash shared library
-install(TARGETS bin2dash
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-)
-
-# Install bin2dash_app executable
-install(TARGETS bin2dash_app
-    RUNTIME DESTINATION bin
-)
-
-
+signals_install_app(bin2dash_app)
