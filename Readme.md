@@ -51,7 +51,7 @@ Pilot#1: two users. Local origin which requires to open ports locally.
 
 ## Pilot #1 and #2 live from encoded CWIPC data
 
- 1. HTTP server depending on your Pilot (node-gpac-htpp for Pilot#1 or Evanescent for Pilot#2).
+ 1. HTTP server depending on your Pilot (node-gpac-http for Pilot#1 or Evanescent for Pilot#2).
  2. Launch ```bin2dash_app``` e.g. ```./bin2dash_app.exe -s 100 folder/to/cwipc_loot-compressed```. If you give no folder (all pilots) or URL (Pilot#2), the capture will start from the camera.
 
 
