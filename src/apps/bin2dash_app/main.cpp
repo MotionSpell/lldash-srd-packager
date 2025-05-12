@@ -118,7 +118,12 @@ int main(int argc, char const* argv[]) {
 			}
 		}
 
-		auto handle = vrt_create_ext("vrtogether", numStreams, desc, config.publishUrl.c_str(), config.segDurInMs);
+		// add trailing separator if not present
+		auto publishUrl = config.publishUrl;
+		if (isalnum(config.publishUrl.back()))
+			publishUrl += "/";
+
+		auto handle = vrt_create_ext("vrtogether", numStreams, desc, publishUrl.c_str(), config.segDurInMs);
 
 		auto paths = resolvePaths(config.inputPath);
 		if (paths.empty())
