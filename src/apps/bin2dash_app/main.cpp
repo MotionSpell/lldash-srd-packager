@@ -99,7 +99,7 @@ int main(int argc, char const* argv[]) {
 		auto const numQuality = 2;
 		auto const numTiles = 3;
 		auto const numStreams = numQuality * numTiles;
-		printf("%d stream(s)\n", numStreams);
+		printf("%d stream(s):\n", numStreams);
 		StreamDesc desc[numStreams] = {};
 		for (int q=0; q<numQuality; ++q) {
 			for (int t=0; t<numTiles; ++t) {
@@ -124,6 +124,8 @@ int main(int argc, char const* argv[]) {
 			publishUrl += "/";
 
 		auto handle = vrt_create_ext("vrtogether", numStreams, desc, publishUrl.c_str(), config.segDurInMs);
+		if (!handle)
+			throw std::runtime_error("Can't create session");
 
 		auto paths = resolvePaths(config.inputPath);
 		if (paths.empty())
@@ -133,7 +135,8 @@ int main(int argc, char const* argv[]) {
 		while (1) {
 			auto buf = loadFile(paths[i % paths.size()]);
 			for (int j=0; j<numStreams; ++j)
-				vrt_push_buffer_ext(handle, j, buf.data(), buf.size());
+				if (!vrt_push_buffer_ext(handle, j, buf.data(), buf.size()))
+					throw std::runtime_error("Can't push buffer");
 
 			if (config.sleepAfterFrameInMs)
 				std::this_thread::sleep_for(std::chrono::milliseconds(config.sleepAfterFrameInMs));
