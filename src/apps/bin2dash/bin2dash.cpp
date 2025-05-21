@@ -35,6 +35,8 @@ struct vrt_handle {
 	vector<Stream> streams;
 
 	unique_ptr<Pipeline> pipe;
+
+	bool error;
 };
 
 struct ExternalSource : Modules::Module {
@@ -68,6 +70,13 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc*s
 
 		// Pipeline
 		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::OnePerModule);
+
+		// Error management
+		auto hErr = h.get();
+		h->pipe->registerErrorCallback([&](const char *str) {
+			g_Log->log(Info, format("Error flag set because \"%s\"", str).c_str());
+			hErr->error = true;
+		});
 
 		// Build parameters
 		auto mp4Flags = ExactInputDur | SegNumStartsAtZero;
@@ -169,6 +178,8 @@ bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer
 			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
 		if (stream_index < 0 || stream_index >= (int)h->streams.size())
 			throw runtime_error("[vrt_push_buffer] invalid stream_index");
+		if (h->error)
+			throw runtime_error("[vrt_push_buffer] error state detected");
 
 		h->streams[stream_index].timeIn180k = fractionToClock(g_SystemClock->now()) - h->streams[stream_index].initTimeIn180k;
 

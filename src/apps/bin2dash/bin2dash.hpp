@@ -45,6 +45,7 @@ VRT_EXPORT vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char
 VRT_EXPORT void vrt_destroy(vrt_handle* h);
 
 // Pushes a buffer to @stream_index. The caller owns it ; the buffer will be copied internally.
+// Returns false when the error flag of the pipeline is set.
 VRT_EXPORT bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize);
 
 // Deprecated.
