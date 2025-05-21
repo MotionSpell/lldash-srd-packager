@@ -53,7 +53,7 @@ static void usage() {
 	fprintf(stderr, "\t-u\tpublishURL: if empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU. (default=\"%s\")\n", cfg.publishUrl.c_str());
 }
 
-Config parseCommandLine(int argc, char const* argv[]) {
+Config parseCommandLine(int argc, char* argv[]) {
 	Config opts;
 
 	int argIdx = 0;
@@ -90,7 +90,7 @@ Config parseCommandLine(int argc, char const* argv[]) {
 	return opts;
 }
 
-int main(int argc, char const* argv[]) {
+int safeMain(int argc, char* argv[]) {
 	try {
 		auto config = parseCommandLine(argc, argv);
 		if(config.help)
@@ -149,4 +149,18 @@ int main(int argc, char const* argv[]) {
 		fprintf(stderr, "[%s] Error: %s\n", g_appName, e.what());
 		return 1;
 	}
+}
+
+int main(int argc, char* argv[])
+{
+  try
+  {
+    safeMain(argc, argv);
+    return 0;
+  }
+  catch(std::exception const& e)
+  {
+    fprintf(stderr, "Fatal: %s\n", e.what());
+    return 1;
+  }
 }
