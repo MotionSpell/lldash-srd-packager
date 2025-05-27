@@ -48,7 +48,7 @@ struct Config {
 static void usage() {
 	fprintf(stderr, "Usage: %s [options, see below] [file_pattern]\n", g_appName);
 	Config cfg;
-	fprintf(stderr, "\t-d\tdurationInMs: 0=segmentTimeline, otherwise SegmentNumber (default: %d)\n", cfg.segDurInMs);
+	fprintf(stderr, "\t-d\tsegmentDurationInMs: 0=segmentTimeline, otherwise SegmentNumber (default: %d)\n", cfg.segDurInMs);
 	fprintf(stderr, "\t-s\tsleepAfterFrameInMs: sleep time in ms after each frame, used for regulation (default: %d)\n", cfg.sleepAfterFrameInMs);
 	fprintf(stderr, "\t-u\tpublishURL: if empty files are written and the node-gpac-http server should be used, otherwise use the Evanescent SFU. (default=\"%s\")\n", cfg.publishUrl.c_str());
 }
@@ -149,6 +149,8 @@ int safeMain(int argc, char* argv[]) {
 		fprintf(stderr, "[%s] Error: %s\n", g_appName, e.what());
 		return 1;
 	}
+
+	return 0;
 }
 
 int main(int argc, char* argv[])
