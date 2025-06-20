@@ -15,7 +15,7 @@
 
 #define VRT_4CC(a,b,c,d) (((a)<<24)|((b)<<16)|((c)<<8)|(d))
 
-const uint64_t BIN2DASH_API_VERSION = 0x20250620A;
+const uint64_t BIN2DASH_API_VERSION = 0x20250620B;
 
 extern "C" {
 // Opaque handle.
@@ -33,10 +33,16 @@ struct StreamDesc {
     uint32_t totalHeight;
 };
 
+enum VRTMessageLevel { VRTMessageError=0, VRTMessageWarning, VRTMessageInfo, VRTMessageDebug };
+typedef void (*VRTMessageCallback)(const char *msg, int level);
+
 // Creates a new packager/streamer and starts the streaming session.
 // @streams: owned by caller
 // The returned pipeline must be freed using vrt_destroy().
-VRT_EXPORT vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc*streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000, uint64_t api_version = BIN2DASH_API_VERSION);
+VRT_EXPORT vrt_handle* vrt_create_ext2(const char* name, VRTMessageCallback onError, int num_streams, const StreamDesc* streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000, uint64_t api_version = BIN2DASH_API_VERSION);
+
+// Deprecated.
+VRT_EXPORT vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc* streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000, uint64_t api_version = BIN2DASH_API_VERSION);
 
 // Deprecated.
 VRT_EXPORT vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000);

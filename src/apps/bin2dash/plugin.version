@@ -2,6 +2,7 @@ FOO {
   # explicitly list symbols to be exported
   global:
 
+    vrt_create_ext2;
     vrt_create_ext;
     vrt_create;
     vrt_destroy;

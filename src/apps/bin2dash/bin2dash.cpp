@@ -23,6 +23,25 @@ using namespace Pipelines;
 using namespace std;
 using namespace chrono;
 
+struct Logger : LogSink
+{
+  void log(Level level, const char* msg) override
+  {
+	if(level > maxLevel)
+		return;
+
+	fprintf(stderr, "[bin2dash::%s] %s\n", name.c_str(), msg);
+	fflush(stderr);
+	if (onError) {
+		onError(format("[bin2dash::%s] %s\n", name.c_str(), msg).c_str(), (int)level);
+	}
+  }
+
+  Level maxLevel = Level::Info;
+  string name;
+  std::function<void(const char*, int level)> onError = nullptr;
+};
+
 struct vrt_handle {
 	vrt_handle(int num_streams) : streams(num_streams) {}
 
@@ -37,6 +56,8 @@ struct vrt_handle {
 	unique_ptr<Pipeline> pipe;
 
 	bool error;
+	Logger logger;
+	std::function<void(const char*)> errorCbk;
 };
 
 struct ExternalSource : Modules::Module {
@@ -60,13 +81,15 @@ static bool startsWith(string s, string prefix) {
   return s.substr(0, prefix.size()) == prefix;
 }
 
-vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc*streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, uint64_t api_version) {
+vrt_handle* vrt_create_ext2(const char* name, VRTMessageCallback onError, int num_streams, const StreamDesc* streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, uint64_t api_version) {
 	try {
 		if (api_version != BIN2DASH_API_VERSION)
 			throw std::runtime_error(format("Inconsistent API version between compilation (%s) and runtime (%s). Aborting.", BIN2DASH_API_VERSION, api_version).c_str());
 
 		setGlobalLogLevel(Info);
 		auto h = make_unique<vrt_handle>(num_streams);
+		h->logger.onError = onError;
+		h->errorCbk = [onError](const char *msg) { onError(msg, Level::Error); };
 
 		// Pipeline
 		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::OnePerModule);
@@ -76,6 +99,7 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc*s
 		h->pipe->registerErrorCallback([&](const char *str) {
 			g_Log->log(Info, format("Error flag set because \"%s\"", str).c_str());
 			hErr->error = true;
+			h->errorCbk(str);
 		});
 
 		// Build parameters
@@ -94,7 +118,7 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc*s
 		dashCfg.mpdName = format("%s.mpd", name);
 		dashCfg.live = true;
 		dashCfg.forceRealDurations = true;
-        dashCfg.presignalNextSegment = true;
+		dashCfg.presignalNextSegment = true;
 		dashCfg.segDurationInMs = seg_dur_in_ms;
 		dashCfg.timeShiftBufferDepthInMs = timeshift_buffer_depth_in_ms;
 		dashCfg.initialOffsetInMs = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
@@ -150,10 +174,17 @@ vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc*s
 
 		return h.release();
 	} catch (exception const& err) {
-		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
-		fflush(stderr);
+		if (onError) {
+			char errbuf[128];
+			snprintf(errbuf, sizeof(errbuf), "[%s] exception caught: %s\n", __func__, err.what());
+			onError(errbuf, Level::Error);
+		}
 		return nullptr;
 	}
+}
+
+vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc* streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, uint64_t api_version) {
+	return vrt_create_ext2(name, [](const char*, int){}, num_streams, streams, publish_url, seg_dur_in_ms, timeshift_buffer_depth_in_ms, api_version);
 }
 
 vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char *publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
@@ -167,6 +198,11 @@ void vrt_destroy(vrt_handle* h) {
 	} catch (exception const& err) {
 		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
 		fflush(stderr);
+		if (h && h->errorCbk) {
+			char errbuf[128];
+			snprintf(errbuf, sizeof(errbuf), "[%s] exception caught: %s\n", __func__, err.what());
+			h->errorCbk(errbuf);
+		}
 	}
 }
 
@@ -194,8 +230,7 @@ bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer
 
 		return true;
 	} catch (exception const& err) {
-		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
-		fflush(stderr);
+		h->logger.log(Level::Error, format("[%s] exception caught: %s\n", __func__, err.what()).c_str());
 		return false;
 	}
 }
@@ -213,8 +248,7 @@ int64_t vrt_get_media_time_ext(vrt_handle* h, int stream_index, int timescale) {
 
 		return rescale(h->streams[stream_index].timeIn180k, IClock::Rate, timescale);
 	} catch (exception const& err) {
-		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
-		fflush(stderr);
+		h->logger.log(Level::Error, format("[%s] exception caught: %s\n", __func__, err.what()).c_str());
 		return -1;
 	}
 }
