@@ -223,3 +223,11 @@ int64_t vrt_get_media_time(vrt_handle* h, int timescale) {
 	return vrt_get_media_time_ext(h, 0, timescale);
 }
 
+const char *vrt_get_version() {
+#ifdef LLDASH_VERSION
+	return "LLDASH_VERSION";
+#else
+	return "unknown";
+#endif
+}
+

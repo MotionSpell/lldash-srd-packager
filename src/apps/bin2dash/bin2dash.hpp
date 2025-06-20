@@ -15,7 +15,7 @@
 
 #define VRT_4CC(a,b,c,d) (((a)<<24)|((b)<<16)|((c)<<8)|(d))
 
-const uint64_t BIN2DASH_API_VERSION = 0x20200327A;
+const uint64_t BIN2DASH_API_VERSION = 0x20250620A;
 
 extern "C" {
 // Opaque handle.
@@ -56,4 +56,7 @@ VRT_EXPORT int64_t vrt_get_media_time_ext(vrt_handle* h, int stream_index, int t
 
 // Deprecated.
 VRT_EXPORT int64_t vrt_get_media_time(vrt_handle* h, int timescale);
+
+// Gets the current parent version. Used to ensure build consistency.
+VRT_EXPORT const char *vrt_get_version();
 }

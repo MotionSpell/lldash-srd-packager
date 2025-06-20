@@ -9,6 +9,7 @@ FOO {
     vrt_push_buffer_ext;
     vrt_get_media_time;
     vrt_get_media_time_ext;
+    vrt_get_version;
 
   # hide everything else
   local: *;
