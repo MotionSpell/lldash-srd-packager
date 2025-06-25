@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(bin2dash VERSION 1.0 LANGUAGES CXX)
+project(lldash-packager VERSION 1.0 LANGUAGES CXX)
 
 
-# Define the source directory for bin2dash
-set(BIN2DASH_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+# Define the source directory for lldash-packager
+set(LLDASH_PACKAGER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,7 +22,7 @@ endif()
 # xxxjack some are actually dependent on the toolchain...
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_compile_options(-Wall -Wextra -Werror -fvisibility=default -fvisibility-inlines-hidden -Wno-deprecated-declarations)
-    set(BIN2DASH_LINK_FLAGS "-Wl,--no-undefined -Wl,--version-script=${BIN2DASH_SRC}/apps/bin2dash/plugin.version")
+    set(LLDASH_PACKAGER_LINK_FLAGS "-Wl,--no-undefined -Wl,--version-script=${ LLDASH_PACKAGER_SRC}/apps/lldash_packager/plugin.version")
 
     # Debug-specific options
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -35,7 +35,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     endif()
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     add_compile_options(-Wall -Wextra -Werror -fvisibility=default -fvisibility-inlines-hidden -Wno-deprecated-declarations)
-    set(BIN2DASH_LINK_FLAGS "")
+    set(LLDASH_PACKAGER_LINK_FLAGS "")
     # Debug-specific options
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         add_compile_options(-g3)
@@ -47,7 +47,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     endif()
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_compile_options(-Wall -Wextra -Werror -fvisibility=default -fvisibility-inlines-hidden -Wno-deprecated-declarations)
-    set(BIN2DASH_LINK_FLAGS "-Wl,--no-undefined -Wl,--version-script=${BIN2DASH_SRC}/apps/bin2dash/plugin.version")
+    set(LLDASH_PACKAGER_LINK_FLAGS "-Wl,--no-undefined -Wl,--version-script=${LLDASH_PACKAGER_SRC}/apps/lldash_packager/plugin.version")
     # Debug-specific options
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         add_compile_options(-g3)
@@ -61,43 +61,43 @@ else()
     message(FATAL_ERROR " Unknown CMAKE_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}")
 endif()
 
-# Add bin2dash shared library
-add_library(bin2dash SHARED
-    ${BIN2DASH_SRC}/apps/bin2dash/bin2dash.cpp
+# Add lldash-packager shared library
+add_library(lldash-packager SHARED
+    ${LLDASH_PACKAGER_SRC}/apps/lldash_packager/lldash_packager.cpp
 )
 
-target_include_directories(bin2dash
-    PRIVATE ${BIN2DASH_SRC}/apps/bin2dash
+target_include_directories(lldash-packager
+    PRIVATE ${LLDASH_PACKAGER_SRC}/apps/lldash_packager
     PRIVATE ${CMAKE_SOURCE_DIR}/signals/include
 )
 
-target_link_libraries(bin2dash
+target_link_libraries(lldash-packager
     PRIVATE signals::media
     PRIVATE signals::modules
     PRIVATE signals::pipeline
     PRIVATE signals::utils
 )
 
-set_target_properties(bin2dash PROPERTIES
-    LINK_FLAGS "${BIN2DASH_LINK_FLAGS}"
+set_target_properties(lldash-packager PROPERTIES
+    LINK_FLAGS "${LLDASH_PACKAGER_LINK_FLAGS}"
 )
 
-signals_install_plugin(bin2dash ".so")
+signals_install_plugin(lldash-packager ".so")
 
-# Add bin2dash_app executable
-add_executable(bin2dash_app
-    ${BIN2DASH_SRC}/apps/bin2dash_app/main.cpp
+# Add lldash-packager_app executable
+add_executable(lldash-packager-app
+    ${LLDASH_PACKAGER_SRC}/apps/lldash_packager_app/main.cpp
 )
 
-target_include_directories(bin2dash_app
-    PRIVATE ${BIN2DASH_SRC}/apps/bin2dash_app
+target_include_directories(lldash-packager-app
+    PRIVATE ${LLDASH_PACKAGER_SRC}/apps/lldash_packager_app
     PRIVATE ${CMAKE_SOURCE_DIR}/signals/include
 )
 
-target_link_libraries(bin2dash_app
+target_link_libraries(lldash-packager-app
     PRIVATE signals::appcommon
     PRIVATE signals::utils
-    PRIVATE bin2dash
+    PRIVATE  lldash-packager
 )
 
-signals_install_app(bin2dash_app)
+signals_install_app(lldash-packager-app)

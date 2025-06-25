@@ -1,4 +1,4 @@
-#include "../bin2dash/bin2dash.hpp"
+#include "../lldash_packager/lldash_packager.hpp"
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -8,7 +8,7 @@
 #include <vector>
 #include <filesystem>
 
-const char *g_appName = "bin2dash_app";
+const char *g_appName = "lldash_packager_app";
 
 namespace {
 std::vector<std::string> resolvePaths(std::string path) {

@@ -15,7 +15,7 @@ Building this repository is not possible. Contact Motion Spell.
 
 The transmission chain includes 3 components:
  - A streamer (this repository).
- - A HTTP server (a node.js script for Pilot#1, the Evanescent SFU for Pilot#2: https://baltig.viaccess-orca.com:8443/VRT/deliverymcu-group/DeliveryMCU/releases).
+ - A HTTP server (a node.js script for Pilot#1, the lldash-relay SFU for Pilot#2: https://baltig.viaccess-orca.com:8443/VRT/deliverymcu-group/DeliveryMCU/releases).
  - A client (the SUB (Signals Unity Bridge) for Pilot#2: https://baltig.viaccess-orca.com:8443/VRT/nativeclient-group/SUB/releases)
 
 
