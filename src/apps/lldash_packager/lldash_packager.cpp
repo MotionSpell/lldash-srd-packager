@@ -1,5 +1,5 @@
 #define BUILDING_DLL
-#include "bin2dash.hpp"
+#include "lldash_packager.hpp"
 
 #include "lib_pipeline/pipeline.hpp"
 #include "lib_media/out/http.hpp"
