@@ -259,7 +259,9 @@ int64_t vrt_get_media_time(vrt_handle* h, int timescale) {
 
 const char *vrt_get_version() {
 #ifdef LLDASH_VERSION
-	return "LLDASH_VERSION";
+#define LLDASH_VERSION_STRINGIFY2(x) LLDASH_VERSION_STRINGIFY(x)
+#define LLDASH_VERSION_STRINGIFY(x) #x
+  return LLDASH_VERSION_STRINGIFY2(LLDASH_VERSION);
 #else
 	return "unknown";
 #endif
