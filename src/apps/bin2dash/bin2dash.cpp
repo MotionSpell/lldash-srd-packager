@@ -25,7 +25,7 @@ using namespace chrono;
 
 struct Logger : LogSink
 {
-  void log(Level level, const char* msg) override
+  void send(Level level, const char* msg) override
   {
 	if(level > maxLevel)
 		return;
@@ -100,6 +100,7 @@ vrt_handle* vrt_create_ext2(const char* name, VRTMessageCallback onError, int nu
 			g_Log->log(Info, format("Error flag set because \"%s\"", str).c_str());
 			hErr->error = true;
 			h->errorCbk(str);
+			return false;
 		});
 
 		// Build parameters
@@ -160,7 +161,7 @@ vrt_handle* vrt_create_ext2(const char* name, VRTMessageCallback onError, int nu
 			h->pipe->connect(source, muxer);
 			h->pipe->connect(muxer, GetInputPin(dasher, stream));
 
-			auto data = make_shared<DataBaseRef>(nullptr);
+			auto data = make_shared<DataRaw>(0);
 			auto meta = make_shared<MetadataPktVideo>();
 			meta->timeScale = Fraction(1000, 1);
 			data->setMetadata(meta);
