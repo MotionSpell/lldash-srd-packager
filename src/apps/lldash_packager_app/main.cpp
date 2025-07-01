@@ -123,7 +123,7 @@ int safeMain(int argc, char* argv[]) {
 		if (isalnum(config.publishUrl.back()))
 			publishUrl += "/";
 
-		auto handle = vrt_create_ext("vrtogether", numStreams, desc, publishUrl.c_str(), config.segDurInMs);
+		auto handle = lldpkg_create("vrtogether", nullptr, numStreams, desc, publishUrl.c_str(), config.segDurInMs, 30000,LLDASH_PACKAGER_API_VERSION);
 		if (!handle)
 			throw std::runtime_error("Can't create session");
 
@@ -135,7 +135,7 @@ int safeMain(int argc, char* argv[]) {
 		while (1) {
 			auto buf = loadFile(paths[i % paths.size()]);
 			for (int j=0; j<numStreams; ++j)
-				if (!vrt_push_buffer_ext(handle, j, buf.data(), buf.size()))
+				if (!lldpkg_push_buffer_ext(handle, j, buf.data(), buf.size()))
 					throw std::runtime_error("Can't push buffer");
 
 			if (config.sleepAfterFrameInMs)
@@ -144,7 +144,7 @@ int safeMain(int argc, char* argv[]) {
 			i++;
 		}
 
-		vrt_destroy(handle);
+		lldpkg_destroy(handle);
 	} catch (std::exception const& e) {
 		fprintf(stderr, "[%s] Error: %s\n", g_appName, e.what());
 		return 1;

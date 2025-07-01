@@ -30,8 +30,11 @@ struct Logger : LogSink
 	if(level > maxLevel)
 		return;
 
-	if (onError)
-		onError(format("[bin2dash::%s] %s\n", name.c_str(), msg).c_str(), (int)level);
+	fprintf(stderr, "[lldpkg::%s] %s\n", name.c_str(), msg);
+	fflush(stderr);
+	if (onError) {
+		onError(format("[lldpkg::%s] %s\n", name.c_str(), msg).c_str(), (int)level);
+	}
   }
 
   Level maxLevel = Level::Info;
@@ -39,8 +42,8 @@ struct Logger : LogSink
   std::function<void(const char*, int level)> onError = nullptr;
 };
 
-struct vrt_handle {
-	vrt_handle(int num_streams) : streams(num_streams) {}
+struct lldpkg_handle {
+	lldpkg_handle(int num_streams) : streams(num_streams) {}
 
 	struct Stream {
 		Stream() : fifo(256) {}
@@ -78,13 +81,13 @@ static bool startsWith(string s, string prefix) {
   return s.substr(0, prefix.size()) == prefix;
 }
 
-vrt_handle* vrt_create_ext2(const char* name, VRTMessageCallback onError, int num_streams, const StreamDesc* streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, uint64_t api_version) {
+lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onError, int num_streams, const StreamDesc* streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, uint64_t api_version) {
 	try {
-		if (api_version != BIN2DASH_API_VERSION)
-			throw std::runtime_error(format("Inconsistent API version between compilation (%s) and runtime (%s). Aborting.", BIN2DASH_API_VERSION, api_version).c_str());
+		if (api_version != LLDASH_PACKAGER_API_VERSION)
+			throw std::runtime_error(format("Inconsistent API version between compilation (%s) and runtime (%s). Aborting.", LLDASH_PACKAGER_API_VERSION, api_version).c_str());
 
 		setGlobalLogLevel(Info);
-		auto h = make_unique<vrt_handle>(num_streams);
+		auto h = make_unique<lldpkg_handle>(num_streams);
 		h->logger.onError = onError;
 		h->errorCbk = [onError](const char *msg) { onError(msg, Level::Error); };
 		setGlobalLogger(h->logger);
@@ -182,16 +185,8 @@ vrt_handle* vrt_create_ext2(const char* name, VRTMessageCallback onError, int nu
 	}
 }
 
-vrt_handle* vrt_create_ext(const char* name, int num_streams, const StreamDesc* streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, uint64_t api_version) {
-	return vrt_create_ext2(name, [](const char*, int){}, num_streams, streams, publish_url, seg_dur_in_ms, timeshift_buffer_depth_in_ms, api_version);
-}
 
-vrt_handle* vrt_create(const char* name, uint32_t MP4_4CC, const char *publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms) {
-	StreamDesc sd = { MP4_4CC, 0, 0, 1, 1, 1, 1 };
-	return vrt_create_ext(name, 1, &sd, publish_url, seg_dur_in_ms, timeshift_buffer_depth_in_ms);
-}
-
-void vrt_destroy(vrt_handle* h) {
+void lldpkg_destroy(lldpkg_handle* h) {
 	try {
 		delete h;
 	} catch (exception const& err) {
@@ -205,7 +200,7 @@ void vrt_destroy(vrt_handle* h) {
 	}
 }
 
-bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize) {
+bool lldpkg_push_buffer_ext(lldpkg_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize) {
 	try {
 		if (!h)
 			throw runtime_error("[vrt_push_buffer] handle can't be NULL");
@@ -234,11 +229,8 @@ bool vrt_push_buffer_ext(vrt_handle* h, int stream_index, const uint8_t * buffer
 	}
 }
 
-bool vrt_push_buffer(vrt_handle* h, const uint8_t * buffer, const size_t bufferSize) {
-	return vrt_push_buffer_ext(h, 0, buffer, bufferSize);
-}
 
-int64_t vrt_get_media_time_ext(vrt_handle* h, int stream_index, int timescale) {
+int64_t lldpkg_get_media_time_ext(lldpkg_handle* h, int stream_index, int timescale) {
 	try {
 		if (!h)
 			throw runtime_error("[vrt_get_media_time] handle can't be NULL");
@@ -252,11 +244,8 @@ int64_t vrt_get_media_time_ext(vrt_handle* h, int stream_index, int timescale) {
 	}
 }
 
-int64_t vrt_get_media_time(vrt_handle* h, int timescale) {
-	return vrt_get_media_time_ext(h, 0, timescale);
-}
 
-const char *vrt_get_version() {
+const char *lldpkg_get_version() {
 #ifdef LLDASH_VERSION
 #define LLDASH_VERSION_STRINGIFY2(x) LLDASH_VERSION_STRINGIFY(x)
 #define LLDASH_VERSION_STRINGIFY(x) #x
