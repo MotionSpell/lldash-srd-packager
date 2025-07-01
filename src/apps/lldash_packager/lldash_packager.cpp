@@ -200,7 +200,7 @@ void lldpkg_destroy(lldpkg_handle* h) {
 	}
 }
 
-bool lldpkg_push_buffer_ext(lldpkg_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize) {
+bool lldpkg_push_buffer(lldpkg_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize) {
 	try {
 		if (!h)
 			throw runtime_error("[vrt_push_buffer] handle can't be NULL");
@@ -230,7 +230,7 @@ bool lldpkg_push_buffer_ext(lldpkg_handle* h, int stream_index, const uint8_t * 
 }
 
 
-int64_t lldpkg_get_media_time_ext(lldpkg_handle* h, int stream_index, int timescale) {
+int64_t lldpkg_get_media_time(lldpkg_handle* h, int stream_index, int timescale) {
 	try {
 		if (!h)
 			throw runtime_error("[vrt_get_media_time] handle can't be NULL");

@@ -47,11 +47,11 @@ LLDPKG_EXPORT void lldpkg_destroy(lldpkg_handle* h);
 
 // Pushes a buffer to @stream_index. The caller owns it ; the buffer will be copied internally.
 // Returns false when the error flag of the pipeline is set.
-LLDPKG_EXPORT bool lldpkg_push_buffer_ext(lldpkg_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize);
+LLDPKG_EXPORT bool lldpkg_push_buffer(lldpkg_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize);
 
 
 // Gets the current media time in @timescale unit for @stream_index. Returns -1 on error.
-LLDPKG_EXPORT int64_t lldpkg_get_media_time_ext(lldpkg_handle* h, int stream_index, int timescale);
+LLDPKG_EXPORT int64_t lldpkg_get_media_time(lldpkg_handle* h, int stream_index, int timescale);
 
 
 

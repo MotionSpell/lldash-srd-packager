@@ -135,7 +135,7 @@ int safeMain(int argc, char* argv[]) {
 		while (1) {
 			auto buf = loadFile(paths[i % paths.size()]);
 			for (int j=0; j<numStreams; ++j)
-				if (!lldpkg_push_buffer_ext(handle, j, buf.data(), buf.size()))
+				if (!lldpkg_push_buffer(handle, j, buf.data(), buf.size()))
 					throw std::runtime_error("Can't push buffer");
 
 			if (config.sleepAfterFrameInMs)

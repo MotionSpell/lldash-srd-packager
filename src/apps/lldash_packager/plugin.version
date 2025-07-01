@@ -4,8 +4,8 @@ FOO {
 
     lldpkg_create;
     lldpkg_destroy;
-    lldpkg_push_buffer_ext;
-    lldpkg_get_media_time_ext;
+    lldpkg_push_buffer;
+    lldpkg_get_media_time;
     lldpkg_get_version;
 
   # hide everything else
