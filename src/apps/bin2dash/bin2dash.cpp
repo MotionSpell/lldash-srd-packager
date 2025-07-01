@@ -30,11 +30,8 @@ struct Logger : LogSink
 	if(level > maxLevel)
 		return;
 
-	fprintf(stderr, "[bin2dash::%s] %s\n", name.c_str(), msg);
-	fflush(stderr);
-	if (onError) {
+	if (onError)
 		onError(format("[bin2dash::%s] %s\n", name.c_str(), msg).c_str(), (int)level);
-	}
   }
 
   Level maxLevel = Level::Info;
@@ -90,6 +87,7 @@ vrt_handle* vrt_create_ext2(const char* name, VRTMessageCallback onError, int nu
 		auto h = make_unique<vrt_handle>(num_streams);
 		h->logger.onError = onError;
 		h->errorCbk = [onError](const char *msg) { onError(msg, Level::Error); };
+		setGlobalLogger(h->logger);
 
 		// Pipeline
 		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::OnePerModule);
