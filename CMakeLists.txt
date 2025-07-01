@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(lldash-packager VERSION 1.0 LANGUAGES CXX)
+project(lldash_packager VERSION 1.0 LANGUAGES CXX)
 
 
 # Define the source directory for lldash-packager
@@ -62,27 +62,27 @@ else()
 endif()
 
 # Add lldash-packager shared library
-add_library(lldash-packager SHARED
+add_library(lldash_packager SHARED
     ${LLDASH_PACKAGER_SRC}/apps/lldash_packager/lldash_packager.cpp
 )
 
-target_include_directories(lldash-packager
+target_include_directories(lldash_packager
     PRIVATE ${LLDASH_PACKAGER_SRC}/apps/lldash_packager
     PRIVATE ${CMAKE_SOURCE_DIR}/signals/include
 )
 
-target_link_libraries(lldash-packager
+target_link_libraries(lldash_packager
     PRIVATE signals::media
     PRIVATE signals::modules
     PRIVATE signals::pipeline
     PRIVATE signals::utils
 )
 
-set_target_properties(lldash-packager PROPERTIES
+set_target_properties(lldash_packager PROPERTIES
     LINK_FLAGS "${LLDASH_PACKAGER_LINK_FLAGS}"
 )
 
-signals_install_plugin(lldash-packager ".so")
+signals_install_plugin(lldash_packager ".so")
 
 # Add lldash-packager_app executable
 add_executable(lldash-packager-app
@@ -97,7 +97,7 @@ target_include_directories(lldash-packager-app
 target_link_libraries(lldash-packager-app
     PRIVATE signals::appcommon
     PRIVATE signals::utils
-    PRIVATE  lldash-packager
+    PRIVATE  lldash_packager
 )
 
 signals_install_app(lldash-packager-app)
