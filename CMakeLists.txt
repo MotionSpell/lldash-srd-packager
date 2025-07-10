@@ -22,7 +22,7 @@ endif()
 # xxxjack some are actually dependent on the toolchain...
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_compile_options(-Wall -Wextra -Werror -fvisibility=default -fvisibility-inlines-hidden -Wno-deprecated-declarations)
-    set(LLDASH_PACKAGER_LINK_FLAGS "-Wl,--no-undefined -Wl,--version-script=${ LLDASH_PACKAGER_SRC}/apps/lldash_packager/plugin.version")
+    set(LLDASH_PACKAGER_LINK_FLAGS "-Wl,--no-undefined -Wl,--version-script=${LLDASH_PACKAGER_SRC}/apps/lldash_packager/plugin.version")
 
     # Debug-specific options
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
