@@ -55,7 +55,7 @@ struct lldpkg_handle {
 
 	unique_ptr<Pipeline> pipe;
 
-	bool error;
+	bool error = false;
 	Logger logger;
 	std::function<void(const char*)> errorCbk;
 };
