@@ -39,7 +39,7 @@ typedef void (*LLDashPackagerMessageCallback)(const char *msg, int level);
 // Creates a new packager/streamer and starts the streaming session.
 // @streams: owned by caller
 // The returned pipeline must be freed using vrt_destroy().
-LLDPKG_EXPORT lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onError, int num_streams, const StreamDesc* streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000, uint64_t api_version = LLDASH_PACKAGER_API_VERSION);
+LLDPKG_EXPORT lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onError, int level, int num_streams, const StreamDesc* streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000, uint64_t api_version = LLDASH_PACKAGER_API_VERSION);
 
 
 // Destroys a pipeline. This frees all the resources.

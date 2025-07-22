@@ -81,12 +81,12 @@ static bool startsWith(string s, string prefix) {
   return s.substr(0, prefix.size()) == prefix;
 }
 
-lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onError, int num_streams, const StreamDesc* streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, uint64_t api_version) {
+lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onError, int level, int num_streams, const StreamDesc* streams, const char* publish_url, int seg_dur_in_ms, int timeshift_buffer_depth_in_ms, uint64_t api_version) {
 	try {
 		if (api_version != LLDASH_PACKAGER_API_VERSION)
 			throw std::runtime_error(format("Inconsistent API version between compilation (%s) and runtime (%s). Aborting.", LLDASH_PACKAGER_API_VERSION, api_version).c_str());
 
-		setGlobalLogLevel(Info);
+		setGlobalLogLevel((Level)level);
 		auto h = make_unique<lldpkg_handle>(num_streams);
 		h->logger.onError = onError;
 		h->errorCbk = [onError](const char *msg) { onError(msg, Level::Error); };
