@@ -88,6 +88,8 @@ lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onE
 
 		setGlobalLogLevel((Level)level);
 		auto h = make_unique<lldpkg_handle>(num_streams);
+		h->logger.name = name;
+		h->logger.maxLevel = (Level)level;
 		h->logger.onError = onError;
 		h->errorCbk = [onError](const char *msg) { onError(msg, Level::Error); };
 		setGlobalLogger(h->logger);
