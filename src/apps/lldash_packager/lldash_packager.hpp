@@ -15,7 +15,7 @@
 
 #define VRT_4CC(a,b,c,d) (((a)<<24)|((b)<<16)|((c)<<8)|(d))
 
-const uint64_t LLDASH_PACKAGER_API_VERSION = 0x20250620B;
+const uint64_t LLDASH_PACKAGER_API_VERSION = 0x20250722;
 
 extern "C" {
 // Opaque handle.
