@@ -30,10 +30,11 @@ struct Logger : LogSink
 	if(level > maxLevel)
 		return;
 
-	fprintf(stderr, "[lldpkg::%s] %s\n", name.c_str(), msg);
-	fflush(stderr);
 	if (onError) {
 		onError(format("[lldpkg::%s] %s\n", name.c_str(), msg).c_str(), (int)level);
+	} else {
+		fprintf(stderr, "[lldpkg::%s] %s\n", name.c_str(), msg);
+		fflush(stderr);
 	}
   }
 
@@ -57,7 +58,7 @@ struct lldpkg_handle {
 
 	bool error = false;
 	Logger logger;
-	std::function<void(const char*)> errorCbk;
+	std::function<bool(const char*)> errorCbk;
 };
 
 struct ExternalSource : Modules::Module {
@@ -86,21 +87,24 @@ lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onE
 		if (api_version != LLDASH_PACKAGER_API_VERSION)
 			throw std::runtime_error(format("Inconsistent API version between compilation (%s) and runtime (%s). Aborting.", LLDASH_PACKAGER_API_VERSION, api_version).c_str());
 
-		setGlobalLogLevel((Level)level);
 		auto h = make_unique<lldpkg_handle>(num_streams);
 		h->logger.name = name;
 		h->logger.maxLevel = (Level)level;
+		h->logger.setLevel((Level)level);
 		h->logger.onError = onError;
-		h->errorCbk = [onError](const char *msg) { onError(msg, Level::Error); };
+		h->errorCbk = [onError](const char *msg) { 
+			if (onError) onError(msg, Level::Error);
+			return true;
+		};
 		setGlobalLogger(h->logger);
 
 		// Pipeline
-		h->pipe = make_unique<Pipeline>(g_Log, false, Threading::OnePerModule);
+		h->pipe = make_unique<Pipeline>(&h->logger, false, Threading::OnePerModule);
 
 		// Error management
 		auto hErr = h.get();
 		h->pipe->registerErrorCallback([&](const char *str) {
-			g_Log->log(Info, format("Error flag set because \"%s\"", str).c_str());
+			h->logger.log(Info, format("Error flag set because \"%s\"", str).c_str());
 			hErr->error = true;
 			h->errorCbk(str);
 			return false;
@@ -141,12 +145,12 @@ lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onE
 			sinkCfg.url = publish_url;
 			sinkCfg.userAgent = "bin2dash";
 			sink = h->pipe->add("HttpSink", &sinkCfg);
-			g_Log->log(Info, format("Pushing to HTTP at \"%s\"", publish_url).c_str());
+			h->logger.log(Info, format("Pushing to HTTP at \"%s\"", publish_url).c_str());
 		} else {
 			FileSystemSinkConfig sinkCfg {};
 			sinkCfg.directory = publish_url;
 			sink = h->pipe->add("FileSystemSink", &sinkCfg);
-			g_Log->log(Info, format("Pushing to filesystem at \"%s\"", publish_url).c_str());
+			h->logger.log(Info, format("Pushing to filesystem at \"%s\"", publish_url).c_str());
 		}
 		h->pipe->connect(dasher, sink);
 		h->pipe->connect(GetOutputPin(dasher, 1), sink, true);
@@ -212,7 +216,6 @@ bool lldpkg_push_buffer(lldpkg_handle* h, int stream_index, const uint8_t * buff
 			throw runtime_error("[vrt_push_buffer] invalid stream_index");
 		if (h->error)
 			throw runtime_error("[vrt_push_buffer] error state detected");
-
 		h->streams[stream_index].timeIn180k = fractionToClock(g_SystemClock->now()) - h->streams[stream_index].initTimeIn180k;
 
 		auto data = make_shared<DataRaw>(bufferSize);
