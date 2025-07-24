@@ -15,7 +15,7 @@
 
 #define VRT_4CC(a,b,c,d) (((a)<<24)|((b)<<16)|((c)<<8)|(d))
 
-const uint64_t LLDASH_PACKAGER_API_VERSION = 0x20250722;
+const uint64_t LLDASH_PACKAGER_API_VERSION = 0x20250724;
 
 extern "C" {
 // Opaque handle.
@@ -42,7 +42,7 @@ typedef void (*LLDashPackagerMessageCallback)(const char *msg, int level);
 LLDPKG_EXPORT lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onError, int level, int num_streams, const StreamDesc* streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000, uint64_t api_version = LLDASH_PACKAGER_API_VERSION);
 
 // Destroys a pipeline. This frees all the resources.
-LLDPKG_EXPORT void lldpkg_destroy(lldpkg_handle* h);
+LLDPKG_EXPORT void lldpkg_destroy(lldpkg_handle* h, bool flush = false);
 
 // Pushes a buffer to @stream_index. The caller owns it ; the buffer will be copied internally.
 // Returns false when the error flag of the pipeline is set.

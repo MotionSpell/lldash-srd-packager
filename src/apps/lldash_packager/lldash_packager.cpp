@@ -193,8 +193,13 @@ lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onE
 }
 
 
-void lldpkg_destroy(lldpkg_handle* h) {
+void lldpkg_destroy(lldpkg_handle* h, bool flush) {
 	try {
+		if (flush) {
+			h->pipe->exitSync();
+			h->pipe->waitForEndOfStream();
+		}
+
 		delete h;
 	} catch (exception const& err) {
 		fprintf(stderr, "[%s] failure: %s\n", __func__, err.what());
