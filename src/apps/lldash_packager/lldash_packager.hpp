@@ -38,9 +38,8 @@ typedef void (*LLDashPackagerMessageCallback)(const char *msg, int level);
 
 // Creates a new packager/streamer and starts the streaming session.
 // @streams: owned by caller
-// The returned pipeline must be freed using vrt_destroy().
+// The returned pipeline must be freed using lldpkg_destroy().
 LLDPKG_EXPORT lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onError, int level, int num_streams, const StreamDesc* streams, const char *publish_url = "", int seg_dur_in_ms = 10000, int timeshift_buffer_depth_in_ms = 30000, uint64_t api_version = LLDASH_PACKAGER_API_VERSION);
-
 
 // Destroys a pipeline. This frees all the resources.
 LLDPKG_EXPORT void lldpkg_destroy(lldpkg_handle* h);
@@ -49,11 +48,8 @@ LLDPKG_EXPORT void lldpkg_destroy(lldpkg_handle* h);
 // Returns false when the error flag of the pipeline is set.
 LLDPKG_EXPORT bool lldpkg_push_buffer(lldpkg_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize);
 
-
 // Gets the current media time in @timescale unit for @stream_index. Returns -1 on error.
 LLDPKG_EXPORT int64_t lldpkg_get_media_time(lldpkg_handle* h, int stream_index, int timescale);
-
-
 
 // Gets the current parent version. Used to ensure build consistency.
 LLDPKG_EXPORT const char *lldpkg_get_version();

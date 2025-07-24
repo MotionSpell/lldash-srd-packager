@@ -210,13 +210,13 @@ void lldpkg_destroy(lldpkg_handle* h) {
 bool lldpkg_push_buffer(lldpkg_handle* h, int stream_index, const uint8_t * buffer, const size_t bufferSize) {
 	try {
 		if (!h)
-			throw runtime_error("[vrt_push_buffer] handle can't be NULL");
+			throw runtime_error("[lldpkg_push_buffer] handle can't be NULL");
 		if (!buffer)
-			throw runtime_error("[vrt_push_buffer] buffer can't be NULL");
+			throw runtime_error("[lldpkg_push_buffer] buffer can't be NULL");
 		if (stream_index < 0 || stream_index >= (int)h->streams.size())
-			throw runtime_error("[vrt_push_buffer] invalid stream_index");
+			throw runtime_error("[lldpkg_push_buffer] invalid stream_index");
 		if (h->error)
-			throw runtime_error("[vrt_push_buffer] error state detected");
+			throw runtime_error("[lldpkg_push_buffer] error state detected");
 		h->streams[stream_index].timeIn180k = fractionToClock(g_SystemClock->now()) - h->streams[stream_index].initTimeIn180k;
 
 		auto data = make_shared<DataRaw>(bufferSize);
@@ -239,9 +239,9 @@ bool lldpkg_push_buffer(lldpkg_handle* h, int stream_index, const uint8_t * buff
 int64_t lldpkg_get_media_time(lldpkg_handle* h, int stream_index, int timescale) {
 	try {
 		if (!h)
-			throw runtime_error("[vrt_get_media_time] handle can't be NULL");
+			throw runtime_error("[lldpkg_get_media_time] handle can't be NULL");
 		if (stream_index < 0 || stream_index >= (int)h->streams.size())
-			throw runtime_error("[vrt_push_buffer] invalid stream_index");
+			throw runtime_error("[lldpkg_push_buffer] invalid stream_index");
 
 		return rescale(h->streams[stream_index].timeIn180k, IClock::Rate, timescale);
 	} catch (exception const& err) {
