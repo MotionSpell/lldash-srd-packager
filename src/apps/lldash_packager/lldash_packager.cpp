@@ -144,6 +144,7 @@ lldpkg_handle* lldpkg_create(const char* name, LLDashPackagerMessageCallback onE
 			HttpOutputConfig sinkCfg {};
 			sinkCfg.url = publish_url;
 			sinkCfg.userAgent = "bin2dash";
+			sinkCfg.maxConnectFailCount = 0;
 			sink = h->pipe->add("HttpSink", &sinkCfg);
 			h->logger.log(Info, format("Pushing to HTTP at \"%s\"", publish_url).c_str());
 		} else {
