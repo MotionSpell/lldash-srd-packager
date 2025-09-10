@@ -123,7 +123,7 @@ int safeMain(int argc, char* argv[]) {
 		if (isalnum(config.publishUrl.back()))
 			publishUrl += "/";
 
-		auto handle = lldpkg_create("vrtogether", nullptr, 0, numStreams, desc, publishUrl.c_str(), config.segDurInMs, 30000,LLDASH_PACKAGER_API_VERSION);
+		auto handle = lldpkg_create("vrtogether", [](const char* msg, int level) { fprintf(stderr, "Level %d message: %s\n", level, msg); }, VRTMessageInfo, numStreams, desc, publishUrl.c_str(), config.segDurInMs, 30000, LLDASH_PACKAGER_API_VERSION);
 		if (!handle)
 			throw std::runtime_error("Can't create session");
 
